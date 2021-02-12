@@ -23,25 +23,71 @@ parameters:
     description: "SecretHub Repo to use to fetch secrets ?"
 
 orbs:
+  secrethub: secrethub/cli@1.0.0
+  slack: circleci/slack@4.2.1
   gravitee: gravitee-io/gravitee@dev:1.0.4
+
+jobs:
+  build_snapshot_n_nexus_job:
+    docker:
+      - image: circleci/openjdk:11.0.3-jdk-stretch
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - restore_cache:
+          keys:
+            - gio-cockpit-connectors-dependencies-{{ checksum "pom.xml" }}
+            - gio-cockpit-connectors-dependencies
+      - secrethub/install
+      - run:
+          name: Maven Package and deploy to nexus snapshots
+          command: |
+                    export SECREHUB_ORG="graviteeio"
+                    export SECREHUB_REPO="cicd"
+                    secrethub read --out-file ./settings.xml ${SECREHUB_ORG}/${SECREHUB_REPO}/graviteebot/infra/maven/settings.dev.snaphots.xml
+                    # cat ./settings.xml
+                    mvn -s ./settings.xml clean deploy
+      # ---
+      # To use Slack nofifications :
+      # => On Circle CI, in project settings, add SLACK_DEFAULT_CHANNEL env. var : the name of the slack channelwhere you want to receive notifiations
+      # => On Circle CI, in project settings, add SLACK_ACCESS_TOKEN env. var : ask a slack Adminuser to give your OAUTH Token
+      # --- 
+      # - slack/notify:
+          # event: fail
+          # template: basic_fail_1
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: gio-cockpit-connectors-dependencies-{{ checksum "pom.xml" }}
+          when: always
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      # ---
+      # Use the below step If you want to perist any file at the end of
+      # the build process
+      # Then this will make the persisted files, available for download, after
+      # pipeline finished execution, with a curl
+      # ---
+      # - persist_to_workspace:
+          # root: some/folder/from/your/maven/project/root/
+          # paths:
+            # - ./*.zip
 
 workflows:
   version: 2.1
-  pull_requests:
-    when:
-      equal: [ pr_build, << pipeline.parameters.gio_action >> ]
+  build_snapshot_n_nexus:
     jobs:
-      - gravitee/pull_request:
-          # This is a  standard pull request : no docker image job
+      - build_snapshot_n_nexus_job:
           context: cicd-orchestrator
-          # you can anytime change the maven container image tag
-          # e.g.you want another jdk or maven version
-          # maven_container_image_tag: stable-latest
-          secrethub_org: graviteeio
-          secrethub_repo: cicd
-          # # [maven_profile_id] maven profile defined in the dev team dedicated [settings.xml]
-          # maven_profile_id: gravitee-dry-run
-          maven_profile_id: gio-dev
+
   mvn_release:
     when:
       and:
