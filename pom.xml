@@ -42,7 +42,7 @@
         <spring.version>5.2.7.RELEASE</spring.version>
         <gravitee-node.version>1.10.0</gravitee-node.version>
         <gravitee-plugin.version>1.16.0</gravitee-plugin.version>
-        <gravitee-cockpit-api.version>1.1.0-SNAPSHOT</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>1.1.0</gravitee-cockpit-api.version>
         <lombok.version>1.18.12</lombok.version>
         <mockito.version>3.4.2</mockito.version>
         <junit-jupiter.version>5.5.2</junit-jupiter.version>
@@ -179,8 +179,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
