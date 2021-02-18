@@ -29,6 +29,7 @@ import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeEmitter;
 import io.reactivex.Single;
+import io.reactivex.subjects.CompletableSubject;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.json.Json;
@@ -48,6 +49,8 @@ public class ClientChannel {
     private final Map<Command.Type, CommandHandler<Command<?>, Reply>> commandHandlers;
     private final CommandProducer<HelloCommand, HelloReply> helloCommandProducer;
 
+    private final Node node;
+
     public ClientChannel(
         WebSocket webSocket,
         Node node,
@@ -55,15 +58,18 @@ public class ClientChannel {
         Map<Command.Type, CommandHandler<Command<?>, Reply>> commandHandlers
     ) {
         this.webSocket = webSocket;
+        this.node = node;
         this.resultEmitters = new ConcurrentHashMap<>();
         this.helloCommandProducer = helloCommandProducer;
         this.commandHandlers = commandHandlers;
+    }
 
+    public Completable init() {
         // Start listening.
         listen();
 
         // Hello command handler is only used once after connection occurred.
-        handleHello(node);
+        return handleHello(node);
     }
 
     public void cleanup() {
@@ -71,7 +77,7 @@ public class ClientChannel {
         resultEmitters.clear();
     }
 
-    void handleHello(Node node) {
+    Completable handleHello(Node node) {
         HelloPayload payload = new HelloPayload();
         io.gravitee.cockpit.api.command.Node payloadNode = new io.gravitee.cockpit.api.command.Node();
         payloadNode.setApplication(node.application());
@@ -79,6 +85,8 @@ public class ClientChannel {
         HelloCommand helloCommand = new HelloCommand(payload);
 
         Single<HelloCommand> helloCommandObs = Single.just(helloCommand);
+
+        CompletableSubject helloHandshakeDone = CompletableSubject.create();
 
         helloCommandObs
             .flatMap(
@@ -100,9 +108,17 @@ public class ClientChannel {
                 }
             )
             .subscribe(
-                reply -> log.info("HelloCommand replied with status [{}]", reply.getCommandStatus()),
-                t -> log.error("Unable to send HelloCommand", t)
+                reply -> {
+                    helloHandshakeDone.onComplete();
+                    log.info("HelloCommand replied with status [{}]", reply.getCommandStatus());
+                },
+                t -> {
+                    helloHandshakeDone.onError(t);
+                    log.error("Unable to send HelloCommand", t);
+                }
             );
+
+        return helloHandshakeDone;
     }
 
     void listen() {
@@ -153,7 +169,7 @@ public class ClientChannel {
         );
     }
 
-    Maybe<Reply> send(Command<? extends Payload> command) {
+    public Maybe<Reply> send(Command<? extends Payload> command) {
         return Maybe
             .<Reply>create(
                 emitter -> {
@@ -189,7 +205,7 @@ public class ClientChannel {
                                 log.error("An error occurred when trying to send command [{}]", command);
                                 emitter.onError(new Exception("Write to socket failed"));
                             } else {
-                                log.debug("Write to socket succeeded");
+                                log.debug("Write to socket succeeded: [{}]", command);
                                 emitter.onComplete();
                             }
                         }

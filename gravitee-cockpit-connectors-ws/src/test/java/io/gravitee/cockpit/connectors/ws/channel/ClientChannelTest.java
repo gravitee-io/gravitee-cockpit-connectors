@@ -68,6 +68,7 @@ class ClientChannelTest {
         commandHandlers = new HashMap<>();
         when(webSocket.handler(listenCaptor.capture())).thenReturn(null);
         cut = new ClientChannel(webSocket, node, null, commandHandlers);
+        cut.init();
         verify(webSocket).write(any(Buffer.class), any(Handler.class));
     }
 
@@ -151,6 +152,7 @@ class ClientChannelTest {
         when(helloCommandCommandProducer.prepare(any(HelloCommand.class))).thenAnswer(i -> Single.just(i.getArgument(0)));
 
         cut = new ClientChannel(webSocket, node, helloCommandCommandProducer, commandHandlers);
+        cut.init();
 
         setCommandHandler(CommandStatus.SUCCEEDED, false);
 

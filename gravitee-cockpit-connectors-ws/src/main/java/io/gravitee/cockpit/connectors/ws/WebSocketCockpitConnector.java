@@ -18,15 +18,14 @@ package io.gravitee.cockpit.connectors.ws;
 import static io.gravitee.cockpit.api.command.Command.PING_PONG_PREFIX;
 
 import io.gravitee.cockpit.api.CockpitConnector;
-import io.gravitee.cockpit.api.command.Command;
-import io.gravitee.cockpit.api.command.CommandHandler;
-import io.gravitee.cockpit.api.command.CommandProducer;
-import io.gravitee.cockpit.api.command.Reply;
+import io.gravitee.cockpit.api.command.*;
 import io.gravitee.cockpit.connectors.ws.channel.ClientChannel;
 import io.gravitee.cockpit.connectors.ws.endpoints.WebSocketEndpoint;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.node.api.Node;
+import io.reactivex.Maybe;
+import io.reactivex.subjects.CompletableSubject;
 import io.vertx.circuitbreaker.CircuitBreaker;
 import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Promise;
@@ -80,6 +79,10 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
     private HttpClient httpClient;
 
+    private ClientChannel clientChannel;
+
+    private final CompletableSubject webSocketConnectionReady = CompletableSubject.create();
+
     public WebSocketCockpitConnector() {
         this.path = "/ws/controller";
     }
@@ -112,7 +115,8 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                     // The connection has been established.
                     if (event.succeeded()) {
                         final WebSocket webSocket = event.result();
-                        final ClientChannel channel = new ClientChannel(webSocket, node, helloCommandProducer, commandHandlers);
+                        clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, commandHandlers);
+                        clientChannel.init().subscribe(webSocketConnectionReady::onComplete);
 
                         // Initialize ping-pong
                         // See RFC 6455 Section <a href="https://tools.ietf.org/html/rfc6455#section-5.5.2"
@@ -143,7 +147,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                                 }
 
                                 // Cleanup channel.
-                                channel.cleanup();
+                                clientChannel.cleanup();
 
                                 // How to force to reconnect ?
                                 connect();
@@ -201,6 +205,11 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
             log.error("An error occurred when trying to connect to Cockpit Controller.", e);
             promise.fail(e);
         }
+    }
+
+    @Override
+    public Maybe<Reply> sendCommand(Command<? extends Payload> command) {
+        return this.webSocketConnectionReady.toSingle(() -> clientChannel).toMaybe().flatMap(clientChannel -> clientChannel.send(command));
     }
 
     @Override
