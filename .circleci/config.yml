@@ -28,6 +28,19 @@ orbs:
   gravitee: gravitee-io/gravitee@dev:1.0.4
 
 jobs:
+  secrethub:
+    docker:
+      - image: 'cimg/base:stable'
+    environment:
+      MAVEN_SETTINGS: 'secrethub://graviteeio/cicd/graviteebot/infra/maven/dry-run/artifactory/settings.dev.xml'
+    steps:
+      - secrethub/exec:
+          command: echo $MAVEN_SETTINGS > /tmp/.circleci.settings.xml
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - .circleci.settings.xml
+
   build_snapshot_n_nexus_job:
     docker:
       - image: circleci/openjdk:11.0.3-jdk-stretch
@@ -42,16 +55,20 @@ jobs:
             - gio-cockpit-connectors-dependencies
       - secrethub/install
       - run:
+          name: Maven Package and deploy to Artifactory
+          command: |
+                    export SECREHUB_ORG="graviteeio"
+                    export SECREHUB_REPO="cicd"
+                    mvn -s /tmp/.circleci.settings.xml -P gio-dev clean deploy
+      - run:
           name: Maven Package and deploy to nexus snapshots
           command: |
                     export SECREHUB_ORG="graviteeio"
                     export SECREHUB_REPO="cicd"
-                    secrethub read --out-file ./settings.xml ${SECREHUB_ORG}/${SECREHUB_REPO}/graviteebot/infra/maven/settings.dev.snaphots.xml
-                    # cat ./settings.xml
-                    mvn -s ./settings.xml clean deploy
+                    mvn -s /tmp/.circleci.settings.xml clean deploy
       # ---
       # To use Slack nofifications :
-      # => On Circle CI, in project settings, add SLACK_DEFAULT_CHANNEL env. var : the name of the slack channelwhere you want to receive notifiations
+      # => On Circle CI, in project settings, add SLACK_DEFAULT_CHANNEL env. var : the name of the slack channel where you want to receive notifications
       # => On Circle CI, in project settings, add SLACK_ACCESS_TOKEN env. var : ask a slack Adminuser to give your OAUTH Token
       # --- 
       # - slack/notify:
@@ -85,8 +102,12 @@ workflows:
   version: 2.1
   build_snapshot_n_nexus:
     jobs:
+      - secrethub:
+          context: cicd-orchestrator
       - build_snapshot_n_nexus_job:
           context: cicd-orchestrator
+          requires:
+            - secrethub
 
   mvn_release:
     when:
