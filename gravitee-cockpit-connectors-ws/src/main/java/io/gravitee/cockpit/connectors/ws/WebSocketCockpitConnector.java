@@ -24,6 +24,7 @@ import io.gravitee.cockpit.connectors.ws.endpoints.WebSocketEndpoint;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.node.api.Node;
+import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.subjects.CompletableSubject;
 import io.vertx.circuitbreaker.CircuitBreaker;
@@ -225,5 +226,9 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
         if (pongHandlerId != 0L) {
             vertx.cancelTimer(pongHandlerId);
         }
+    }
+
+    public Completable whenReady() {
+        return this.webSocketConnectionReady;
     }
 }
