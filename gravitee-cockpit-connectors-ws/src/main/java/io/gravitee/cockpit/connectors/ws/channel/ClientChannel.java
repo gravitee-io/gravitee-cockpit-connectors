@@ -50,6 +50,8 @@ public class ClientChannel {
     private final CommandProducer<HelloCommand, HelloReply> helloCommandProducer;
 
     private final Node node;
+    private boolean goodbyeCommandReceived = false;
+    private ClientChannelCloseHandler closeHandler = () -> {};
 
     public ClientChannel(
         WebSocket webSocket,
@@ -121,6 +123,10 @@ public class ClientChannel {
         return helloHandshakeDone;
     }
 
+    void handleGoodbye() {
+        goodbyeCommandReceived = true;
+    }
+
     void listen() {
         webSocket.handler(
             buffer -> {
@@ -135,6 +141,10 @@ public class ClientChannel {
                         Command<?> command = Json.decodeValue(incoming.replace(COMMAND_PREFIX, ""), Command.class);
                         CommandHandler<Command<?>, Reply> commandHandler = commandHandlers.get(command.getType());
 
+                        if (command.getType().equals(Type.GOODBYE_COMMAND)) {
+                            handleGoodbye();
+                        }
+
                         if (commandHandler != null) {
                             commandHandler
                                 .handle(command)
@@ -143,6 +153,9 @@ public class ClientChannel {
                                         reply(reply);
                                         if (reply.stopOnErrorStatus() && reply.getCommandStatus() == ERROR) {
                                             webSocket.close();
+                                        }
+                                        if (goodbyeCommandReceived) {
+                                            closeHandler.handle();
                                         }
                                     },
                                     e -> webSocket.close((short) 500, "Unexpected error")
@@ -179,6 +192,10 @@ public class ClientChannel {
             )
             // Cleanup result emitters list if cancelled by the upstream.
             .doOnDispose(() -> resultEmitters.remove(command.getId()));
+    }
+
+    public void onClose(ClientChannelCloseHandler closeHandler) {
+        this.closeHandler = closeHandler;
     }
 
     void reply(Reply reply) {

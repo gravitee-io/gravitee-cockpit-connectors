@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import io.gravitee.cockpit.api.command.*;
+import io.gravitee.cockpit.api.command.goodbye.GoodbyeCommand;
 import io.gravitee.cockpit.api.command.hello.HelloCommand;
 import io.gravitee.cockpit.api.command.hello.HelloReply;
 import io.gravitee.cockpit.api.command.organization.OrganizationCommand;
@@ -54,6 +55,9 @@ class ClientChannelTest {
     private WebSocket webSocket;
 
     @Mock
+    private ClientChannelCloseHandler closeHandler;
+
+    @Mock
     private Node node;
 
     @Captor
@@ -68,6 +72,7 @@ class ClientChannelTest {
         commandHandlers = new HashMap<>();
         when(webSocket.handler(listenCaptor.capture())).thenReturn(null);
         cut = new ClientChannel(webSocket, node, null, commandHandlers);
+        cut.onClose(closeHandler);
         cut.init();
         verify(webSocket).write(any(Buffer.class), any(Handler.class));
     }
@@ -110,7 +115,7 @@ class ClientChannelTest {
 
     @Test
     public void listenCommand() {
-        setCommandHandler(CommandStatus.SUCCEEDED, false);
+        setCommandHandler(Command.Type.ORGANIZATION_COMMAND, Reply.Type.ORGANIZATION_REPLY, CommandStatus.SUCCEEDED, false);
 
         OrganizationPayload organizationPayload = new OrganizationPayload();
         OrganizationCommand organizationCommand = new OrganizationCommand(organizationPayload);
@@ -122,7 +127,7 @@ class ClientChannelTest {
 
     @Test
     public void listenCommandError() {
-        setCommandHandler(CommandStatus.ERROR, false);
+        setCommandHandler(Command.Type.ORGANIZATION_COMMAND, Reply.Type.ORGANIZATION_REPLY, CommandStatus.ERROR, false);
 
         OrganizationPayload organizationPayload = new OrganizationPayload();
         OrganizationCommand organizationCommand = new OrganizationCommand(organizationPayload);
@@ -135,7 +140,7 @@ class ClientChannelTest {
 
     @Test
     public void listenCommandStopOnError() {
-        setCommandHandler(CommandStatus.ERROR, true);
+        setCommandHandler(Command.Type.ORGANIZATION_COMMAND, Reply.Type.ORGANIZATION_REPLY, CommandStatus.ERROR, true);
 
         OrganizationPayload organizationPayload = new OrganizationPayload();
         OrganizationCommand organizationCommand = new OrganizationCommand(organizationPayload);
@@ -147,6 +152,21 @@ class ClientChannelTest {
     }
 
     @Test
+    public void listenGoodbyeCommand() {
+        setCommandHandler(Command.Type.GOODBYE_COMMAND, Reply.Type.GOODBYE_REPLY, CommandStatus.SUCCEEDED, true);
+
+        GoodbyeCommand command = new GoodbyeCommand();
+        listenCaptor.getValue().handle(Buffer.buffer("command: " + Json.encode(command)));
+
+        // Reply should be sent.
+        verify(webSocket).write(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
+        verifyNoMoreInteractions(webSocket);
+
+        // Close handle should be call
+        verify(closeHandler).handle();
+    }
+
+    @Test
     public void handleHelloWithHelloCommandProducer() {
         final CommandProducer<HelloCommand, HelloReply> helloCommandCommandProducer = mock(CommandProducer.class);
         when(helloCommandCommandProducer.prepare(any(HelloCommand.class))).thenAnswer(i -> Single.just(i.getArgument(0)));
@@ -154,7 +174,7 @@ class ClientChannelTest {
         cut = new ClientChannel(webSocket, node, helloCommandCommandProducer, commandHandlers);
         cut.init();
 
-        setCommandHandler(CommandStatus.SUCCEEDED, false);
+        setCommandHandler(Command.Type.ORGANIZATION_COMMAND, Reply.Type.ORGANIZATION_REPLY, CommandStatus.SUCCEEDED, false);
 
         OrganizationPayload organizationPayload = new OrganizationPayload();
         OrganizationCommand organizationCommand = new OrganizationCommand(organizationPayload);
@@ -180,19 +200,19 @@ class ClientChannelTest {
         obs.assertError(ChannelClosedException.class);
     }
 
-    private void setCommandHandler(CommandStatus expectedStatus, boolean stopOnError) {
+    private void setCommandHandler(Command.Type commandType, Reply.Type replyType, CommandStatus expectedStatus, boolean stopOnError) {
         commandHandlers.put(
-            Command.Type.ORGANIZATION_COMMAND,
+            commandType,
             new CommandHandler<Command<?>, Reply>() {
                 @Override
                 public Command.Type handleType() {
-                    return Command.Type.ORGANIZATION_COMMAND;
+                    return commandType;
                 }
 
                 @Override
                 public Single<Reply> handle(Command<?> command) {
                     return Single.just(
-                        new Reply(Reply.Type.ORGANIZATION_REPLY) {
+                        new Reply(replyType) {
                             @Override
                             public String getCommandId() {
                                 return command.getId();
@@ -200,7 +220,7 @@ class ClientChannelTest {
 
                             @Override
                             public Type getType() {
-                                return Type.ORGANIZATION_REPLY;
+                                return replyType;
                             }
 
                             @Override

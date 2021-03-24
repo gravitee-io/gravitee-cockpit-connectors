@@ -72,6 +72,8 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     @Qualifier("cockpitHelloCommandProducer")
     private CommandProducer helloCommandProducer;
 
+    private boolean closedByCockpit = false;
+
     private long pongHandlerId;
 
     private CircuitBreaker circuitBreaker;
@@ -117,6 +119,12 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                     if (event.succeeded()) {
                         final WebSocket webSocket = event.result();
                         clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, commandHandlers);
+                        clientChannel.onClose(
+                            () -> {
+                                closedByCockpit = true;
+                                webSocket.close();
+                            }
+                        );
                         clientChannel.init().subscribe(webSocketConnectionReady::onComplete);
 
                         // Initialize ping-pong
@@ -150,8 +158,10 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                                 // Cleanup channel.
                                 clientChannel.cleanup();
 
-                                // How to force to reconnect ?
-                                connect();
+                                if (!closedByCockpit) {
+                                    // How to force to reconnect ?
+                                    connect();
+                                }
                             }
                         );
                     } else {
