@@ -113,6 +113,10 @@ public class ClientChannel {
                 reply -> {
                     helloHandshakeDone.onComplete();
                     log.info("HelloCommand replied with status [{}]", reply.getCommandStatus());
+
+                    if (reply.getInstallationStatus().equals("DELETED")) {
+                        closeHandler.handle();
+                    }
                 },
                 t -> {
                     helloHandshakeDone.onError(t);
