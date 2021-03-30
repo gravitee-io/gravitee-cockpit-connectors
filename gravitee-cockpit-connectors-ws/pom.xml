@@ -28,10 +28,10 @@
     </parent>
 
     <artifactId>gravitee-cockpit-connectors-ws</artifactId>
-    <name>GraviteeSource - Cockpit - Connectors - WebSocket</name>
+    <name>Gravitee.io - Cockpit - Connectors - WebSocket</name>
 
     <dependencies>
-        <!-- GraviteeSource dependencies -->
+        <!-- Gravitee dependencies -->
         <dependency>
             <groupId>io.gravitee.cockpit</groupId>
             <artifactId>gravitee-cockpit-connectors-core</artifactId>
@@ -41,10 +41,6 @@
             <groupId>io.gravitee.node</groupId>
             <artifactId>gravitee-node-vertx</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.gravitee.cockpit</groupId>
-            <artifactId>gravitee-cockpit-api</artifactId>
         </dependency>
 
         <!-- Vert.x -->

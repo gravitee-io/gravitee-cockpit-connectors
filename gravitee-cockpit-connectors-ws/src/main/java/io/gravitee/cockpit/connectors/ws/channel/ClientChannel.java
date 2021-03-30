@@ -25,11 +25,9 @@ import io.gravitee.cockpit.api.command.hello.HelloReply;
 import io.gravitee.cockpit.api.command.ignored.IgnoredReply;
 import io.gravitee.cockpit.connectors.ws.exceptions.ChannelClosedException;
 import io.gravitee.node.api.Node;
-import io.reactivex.Completable;
-import io.reactivex.Maybe;
-import io.reactivex.MaybeEmitter;
-import io.reactivex.Single;
+import io.reactivex.*;
 import io.reactivex.subjects.CompletableSubject;
+import io.reactivex.subjects.SingleSubject;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.json.Json;
@@ -45,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ClientChannel {
 
     private final WebSocket webSocket;
-    private final Map<String, MaybeEmitter<Reply>> resultEmitters;
+    private final Map<String, SingleEmitter<Reply>> resultEmitters;
     private final Map<Command.Type, CommandHandler<Command<?>, Reply>> commandHandlers;
     private final CommandProducer<HelloCommand, HelloReply> helloCommandProducer;
 
@@ -66,7 +64,7 @@ public class ClientChannel {
         this.commandHandlers = commandHandlers;
     }
 
-    public Completable init() {
+    public Single<HelloReply> init() {
         // Start listening.
         listen();
 
@@ -79,7 +77,7 @@ public class ClientChannel {
         resultEmitters.clear();
     }
 
-    Completable handleHello(Node node) {
+    Single<HelloReply> handleHello(Node node) {
         HelloPayload payload = new HelloPayload();
         io.gravitee.cockpit.api.command.Node payloadNode = new io.gravitee.cockpit.api.command.Node();
         payloadNode.setApplication(node.application());
@@ -88,7 +86,7 @@ public class ClientChannel {
 
         Single<HelloCommand> helloCommandObs = Single.just(helloCommand);
 
-        CompletableSubject helloHandshakeDone = CompletableSubject.create();
+        SingleSubject<HelloReply> helloHandshakeDone = SingleSubject.create();
 
         helloCommandObs
             .flatMap(
@@ -100,8 +98,8 @@ public class ClientChannel {
                     return Single.just(command);
                 }
             )
-            .flatMapMaybe(this::send)
-            .flatMapSingle(
+            .flatMap(this::send)
+            .flatMap(
                 reply -> {
                     if (helloCommandProducer != null) {
                         return helloCommandProducer.handleReply((HelloReply) reply);
@@ -111,7 +109,7 @@ public class ClientChannel {
             )
             .subscribe(
                 reply -> {
-                    helloHandshakeDone.onComplete();
+                    helloHandshakeDone.onSuccess(reply);
                     log.info("HelloCommand replied with status [{}]", reply.getCommandStatus());
 
                     if (reply.getInstallationStatus().equals("DELETED")) {
@@ -170,7 +168,7 @@ public class ClientChannel {
                         }
                     } else if (incoming.startsWith(REPLY_PREFIX)) {
                         Reply reply = Json.decodeValue(incoming.replace(REPLY_PREFIX, ""), Reply.class);
-                        MaybeEmitter<Reply> emitter = resultEmitters.remove(reply.getCommandId());
+                        SingleEmitter<Reply> emitter = resultEmitters.remove(reply.getCommandId());
 
                         if (emitter != null) {
                             emitter.onSuccess(reply);
@@ -186,8 +184,8 @@ public class ClientChannel {
         );
     }
 
-    public Maybe<Reply> send(Command<? extends Payload> command) {
-        return Maybe
+    public Single<Reply> send(Command<? extends Payload> command) {
+        return Single
             .<Reply>create(
                 emitter -> {
                     resultEmitters.put(command.getId(), emitter);

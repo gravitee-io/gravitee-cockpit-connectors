@@ -19,14 +19,16 @@ import static io.gravitee.cockpit.api.command.Command.PING_PONG_PREFIX;
 
 import io.gravitee.cockpit.api.CockpitConnector;
 import io.gravitee.cockpit.api.command.*;
+import io.gravitee.cockpit.api.command.hello.HelloReply;
+import io.gravitee.cockpit.api.command.installation.InstallationPayload;
+import io.gravitee.cockpit.api.command.installation.InstallationReply;
+import io.gravitee.cockpit.connectors.core.internal.CommandHandlerWrapper;
 import io.gravitee.cockpit.connectors.ws.channel.ClientChannel;
 import io.gravitee.cockpit.connectors.ws.endpoints.WebSocketEndpoint;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.node.api.Node;
-import io.reactivex.Completable;
-import io.reactivex.Maybe;
-import io.reactivex.subjects.CompletableSubject;
+import io.reactivex.Single;
 import io.vertx.circuitbreaker.CircuitBreaker;
 import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Promise;
@@ -34,7 +36,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.WebSocket;
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,6 +52,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class WebSocketCockpitConnector extends AbstractService<CockpitConnector> implements CockpitConnector {
 
     private static final long PING_HANDLER_DELAY = 5000;
+    private static final String COCKPIT_ACCEPTED_STATUS = "ACCEPTED";
 
     @Value("${cockpit.enabled:false}")
     private boolean enabled;
@@ -66,7 +71,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
     @Autowired
     @Qualifier("cockpitCommandHandlers")
-    private Map<Command.Type, CommandHandler<Command<?>, Reply>> commandHandlers;
+    private Map<Command.Type, CommandHandlerWrapper<Command<?>, Reply>> commandHandlers;
 
     @Autowired(required = false)
     @Qualifier("cockpitHelloCommandProducer")
@@ -84,16 +89,24 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
     private ClientChannel clientChannel;
 
-    private final CompletableSubject webSocketConnectionReady = CompletableSubject.create();
+    private final Collection<Runnable> onConnectListeners;
+    private final Collection<Runnable> onDisconnectListeners;
+    private final Collection<Runnable> onReadyListeners;
 
     public WebSocketCockpitConnector() {
         this.path = "/ws/controller";
+        onConnectListeners = new ConcurrentLinkedQueue<>();
+        onDisconnectListeners = new ConcurrentLinkedQueue<>();
+        onReadyListeners = new ConcurrentLinkedQueue<>();
     }
 
     @Override
     protected void doStart() {
         if (enabled) {
             log.info("Cockpit connector is enabled. Starting connector.");
+
+            commandHandlers.values().forEach(commandHandler -> commandHandler.setCallback(this::handleOnReadyNotification));
+
             circuitBreaker =
                 CircuitBreaker.create(
                     "cockpit-connector",
@@ -110,6 +123,21 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
         }
     }
 
+    @Override
+    public void registerOnConnectListener(Runnable runnable) {
+        onConnectListeners.add(runnable);
+    }
+
+    @Override
+    public void registerOnDisconnectListener(Runnable runnable) {
+        onDisconnectListeners.add(runnable);
+    }
+
+    @Override
+    public void registerOnReadyListener(Runnable runnable) {
+        onReadyListeners.add(runnable);
+    }
+
     private void connect() {
         circuitBreaker
             .execute(this::doConnect)
@@ -118,14 +146,17 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                     // The connection has been established.
                     if (event.succeeded()) {
                         final WebSocket webSocket = event.result();
-                        clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, commandHandlers);
+                        clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, ((Map) commandHandlers));
+
+                        this.notifyOnConnectListeners();
+
                         clientChannel.onClose(
                             () -> {
                                 closedByCockpit = true;
                                 webSocket.close();
                             }
                         );
-                        clientChannel.init().subscribe(webSocketConnectionReady::onComplete);
+                        clientChannel.init().subscribe(helloReply -> handleOnReadyNotification(null, helloReply));
 
                         // Initialize ping-pong
                         // See RFC 6455 Section <a href="https://tools.ietf.org/html/rfc6455#section-5.5.2"
@@ -158,6 +189,8 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                                 // Cleanup channel.
                                 clientChannel.cleanup();
 
+                                notifyOnDisconnectListeners();
+
                                 if (!closedByCockpit) {
                                     // How to force to reconnect ?
                                     connect();
@@ -170,6 +203,21 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                     }
                 }
             );
+    }
+
+    private void notifyOnConnectListeners() {
+        log.debug("Notifying all OnConnect listeners.");
+        onConnectListeners.forEach(Runnable::run);
+    }
+
+    private void notifyOnDisconnectListeners() {
+        log.debug("Notifying all OnDisconnect listeners.");
+        onDisconnectListeners.forEach(Runnable::run);
+    }
+
+    private void notifyOnReadyListeners() {
+        log.debug("Notifying all OnReady listeners.");
+        onReadyListeners.forEach(Runnable::run);
     }
 
     private void doConnect(Promise<WebSocket> promise) {
@@ -195,7 +243,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                         // Re-init endpoint counter.
                         webSocketEndpoint.reinitRetryCount();
 
-                        log.info("Channel is ready to send data to Cockpit Controller through websocket from {}", webSocketEndpoint + path);
+                        log.info("Channel is now connected to Cockpit Controller through websocket from {}", webSocketEndpoint + path);
                         promise.complete(result.result());
                     } else {
                         Throwable throwable = result.cause();
@@ -219,8 +267,8 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     }
 
     @Override
-    public Maybe<Reply> sendCommand(Command<? extends Payload> command) {
-        return this.webSocketConnectionReady.toSingle(() -> clientChannel).toMaybe().flatMap(clientChannel -> clientChannel.send(command));
+    public Single<Reply> sendCommand(Command<? extends Payload> command) {
+        return clientChannel.send(command);
     }
 
     @Override
@@ -238,7 +286,17 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
         }
     }
 
-    public Completable whenReady() {
-        return this.webSocketConnectionReady;
+    private void handleOnReadyNotification(Command<?> command, Reply reply) {
+        String installationStatus = null;
+
+        if (reply instanceof HelloReply) {
+            installationStatus = ((HelloReply) reply).getInstallationStatus();
+        } else if (reply instanceof InstallationReply) {
+            installationStatus = ((InstallationPayload) command.getPayload()).getStatus();
+        }
+
+        if (COCKPIT_ACCEPTED_STATUS.equals(installationStatus)) {
+            notifyOnReadyListeners();
+        }
     }
 }

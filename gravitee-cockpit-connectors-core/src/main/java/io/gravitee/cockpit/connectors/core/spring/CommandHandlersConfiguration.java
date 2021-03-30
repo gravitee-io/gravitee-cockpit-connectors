@@ -18,6 +18,7 @@ package io.gravitee.cockpit.connectors.core.spring;
 import io.gravitee.cockpit.api.command.Command;
 import io.gravitee.cockpit.api.command.CommandHandler;
 import io.gravitee.cockpit.api.command.Reply;
+import io.gravitee.cockpit.connectors.core.internal.CommandHandlerWrapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.context.ApplicationContext;
@@ -30,15 +31,18 @@ import org.springframework.context.annotation.Bean;
 public class CommandHandlersConfiguration {
 
     @Bean("cockpitCommandHandlers")
-    Map<Command.Type, CommandHandler<Command<?>, Reply>> allCommandHandlers(ApplicationContext context) {
-        Map<Command.Type, CommandHandler<Command<?>, Reply>> allHandlers = new HashMap<>();
+    Map<Command.Type, CommandHandlerWrapper<Command<?>, Reply>> allCommandHandlers(ApplicationContext context) {
+        Map<Command.Type, CommandHandlerWrapper<Command<?>, Reply>> allHandlers = new HashMap<>();
 
         ApplicationContext applicationContext = context;
 
         while (applicationContext != null) {
             applicationContext
                 .getBeansOfType(CommandHandler.class)
-                .forEach((s, commandHandler) -> allHandlers.put(commandHandler.handleType(), commandHandler));
+                .forEach(
+                    (s, commandHandler) ->
+                        allHandlers.put(commandHandler.handleType(), new CommandHandlerWrapper<Command<?>, Reply>(commandHandler))
+                );
             applicationContext = applicationContext.getParent();
         }
 
