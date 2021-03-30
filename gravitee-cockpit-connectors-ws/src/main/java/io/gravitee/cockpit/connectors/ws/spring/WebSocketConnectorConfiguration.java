@@ -16,6 +16,7 @@
 package io.gravitee.cockpit.connectors.ws.spring;
 
 import io.gravitee.cockpit.connectors.core.spring.CommandHandlersConfiguration;
+import io.gravitee.cockpit.connectors.core.spring.MonitoringCollectorConfiguration;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientConfiguration;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
 import io.vertx.core.Vertx;
@@ -29,7 +30,7 @@ import org.springframework.core.env.Environment;
  * @author GraviteeSource Team
  */
 @Configuration
-@Import(CommandHandlersConfiguration.class)
+@Import({ CommandHandlersConfiguration.class, MonitoringCollectorConfiguration.class })
 public class WebSocketConnectorConfiguration {
 
     @Bean

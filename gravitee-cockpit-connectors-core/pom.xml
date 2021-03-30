@@ -43,6 +43,11 @@
             <artifactId>gravitee-node-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.gravitee.node</groupId>
+            <artifactId>gravitee-node-monitoring</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Spring dependencies -->
         <dependency>
