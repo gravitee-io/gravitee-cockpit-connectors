@@ -31,7 +31,7 @@ public class WebSocketEndpoint {
     @Getter
     private final String url;
 
-    private URI uri;
+    private final URI uri;
 
     @Getter
     private int retryCount;
@@ -59,8 +59,8 @@ public class WebSocketEndpoint {
         return uri.getHost();
     }
 
-    public String getPath() {
-        return uri.getRawPath();
+    public String resolvePath(String path) {
+        return uri.resolve(path).getRawPath();
     }
 
     public boolean isRemovable() {
