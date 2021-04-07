@@ -174,7 +174,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
             httpClient.webSocket(
                 webSocketEndpoint.getPort(),
                 webSocketEndpoint.getHost(),
-                webSocketEndpoint.getPath() + path,
+                webSocketEndpoint.resolvePath(path),
                 result -> {
                     if (result.succeeded()) {
                         // Re-init endpoint counter.
