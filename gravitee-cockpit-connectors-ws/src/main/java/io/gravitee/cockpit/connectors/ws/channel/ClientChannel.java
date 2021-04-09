@@ -112,7 +112,7 @@ public class ClientChannel {
                     helloHandshakeDone.onSuccess(reply);
                     log.info("HelloCommand replied with status [{}]", reply.getCommandStatus());
 
-                    if (reply.getInstallationStatus().equals("DELETED")) {
+                    if (shouldCloseConnection(reply)) {
                         closeHandler.handle();
                     }
                 },
@@ -230,5 +230,10 @@ public class ClientChannel {
                         }
                     )
         );
+    }
+
+    private boolean shouldCloseConnection(HelloReply reply) {
+        String installationStatus = reply.getInstallationStatus();
+        return installationStatus.equals("DELETED") || installationStatus.equals("INCOMPATIBLE");
     }
 }
