@@ -24,9 +24,10 @@ import io.gravitee.cockpit.api.command.hello.HelloPayload;
 import io.gravitee.cockpit.api.command.hello.HelloReply;
 import io.gravitee.cockpit.api.command.ignored.IgnoredReply;
 import io.gravitee.cockpit.connectors.ws.exceptions.ChannelClosedException;
+import io.gravitee.common.util.Version;
 import io.gravitee.node.api.Node;
+import io.gravitee.plugin.core.api.PluginManifest;
 import io.reactivex.*;
-import io.reactivex.subjects.CompletableSubject;
 import io.reactivex.subjects.SingleSubject;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
@@ -48,6 +49,7 @@ public class ClientChannel {
     private final CommandProducer<HelloCommand, HelloReply> helloCommandProducer;
 
     private final Node node;
+    private final PluginManifest pluginManifest;
     private boolean goodbyeCommandReceived = false;
     private ClientChannelCloseHandler closeHandler = () -> {};
 
@@ -55,10 +57,12 @@ public class ClientChannel {
         WebSocket webSocket,
         Node node,
         CommandProducer<HelloCommand, HelloReply> helloCommandProducer,
-        Map<Command.Type, CommandHandler<Command<?>, Reply>> commandHandlers
+        Map<Type, CommandHandler<Command<?>, Reply>> commandHandlers,
+        PluginManifest pluginManifest
     ) {
         this.webSocket = webSocket;
         this.node = node;
+        this.pluginManifest = pluginManifest;
         this.resultEmitters = new ConcurrentHashMap<>();
         this.helloCommandProducer = helloCommandProducer;
         this.commandHandlers = commandHandlers;
@@ -81,6 +85,9 @@ public class ClientChannel {
         HelloPayload payload = new HelloPayload();
         io.gravitee.cockpit.api.command.Node payloadNode = new io.gravitee.cockpit.api.command.Node();
         payloadNode.setApplication(node.application());
+        payloadNode.setVersion(Version.RUNTIME_VERSION.MAJOR_VERSION);
+        payloadNode.setConnectorVersion(pluginManifest.version());
+        payloadNode.setHostname(node.hostname());
         payload.setNode(payloadNode);
         HelloCommand helloCommand = new HelloCommand(payload);
 
