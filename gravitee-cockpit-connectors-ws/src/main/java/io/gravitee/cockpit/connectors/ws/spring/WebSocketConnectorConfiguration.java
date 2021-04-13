@@ -19,6 +19,8 @@ import io.gravitee.cockpit.connectors.core.spring.CommandHandlersConfiguration;
 import io.gravitee.cockpit.connectors.core.spring.MonitoringCollectorConfiguration;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientConfiguration;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
+import io.gravitee.plugin.core.api.PluginManifest;
+import io.gravitee.plugin.core.api.PluginRegistry;
 import io.vertx.core.Vertx;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +35,8 @@ import org.springframework.core.env.Environment;
 @Import({ CommandHandlersConfiguration.class, MonitoringCollectorConfiguration.class })
 public class WebSocketConnectorConfiguration {
 
+    public static final String COCKPIT_CONNECTORS_WS_PLUGIN_ID = "cockpit-connectors-ws";
+
     @Bean
     public HttpClientConfiguration httpClientConfiguration(Environment environment) {
         return new HttpClientConfiguration(environment);
@@ -41,5 +45,16 @@ public class WebSocketConnectorConfiguration {
     @Bean
     public HttpClientFactory httpClientFactory(Vertx vertx, HttpClientConfiguration configuration) {
         return new HttpClientFactory(vertx, configuration);
+    }
+
+    @Bean("pluginManifest")
+    PluginManifest pluginInfos(PluginRegistry pluginRegistry) {
+        return pluginRegistry
+            .plugins()
+            .stream()
+            .filter(plugin -> plugin.id().equals(COCKPIT_CONNECTORS_WS_PLUGIN_ID))
+            .findFirst()
+            .get()
+            .manifest();
     }
 }

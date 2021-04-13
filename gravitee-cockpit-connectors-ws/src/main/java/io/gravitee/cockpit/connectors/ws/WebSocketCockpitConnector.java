@@ -18,7 +18,10 @@ package io.gravitee.cockpit.connectors.ws;
 import static io.gravitee.cockpit.api.command.Command.PING_PONG_PREFIX;
 
 import io.gravitee.cockpit.api.CockpitConnector;
-import io.gravitee.cockpit.api.command.*;
+import io.gravitee.cockpit.api.command.Command;
+import io.gravitee.cockpit.api.command.CommandProducer;
+import io.gravitee.cockpit.api.command.Payload;
+import io.gravitee.cockpit.api.command.Reply;
 import io.gravitee.cockpit.api.command.hello.HelloReply;
 import io.gravitee.cockpit.api.command.installation.InstallationPayload;
 import io.gravitee.cockpit.api.command.installation.InstallationReply;
@@ -28,6 +31,7 @@ import io.gravitee.cockpit.connectors.ws.endpoints.WebSocketEndpoint;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.node.api.Node;
+import io.gravitee.plugin.core.api.PluginManifest;
 import io.reactivex.Single;
 import io.vertx.circuitbreaker.CircuitBreaker;
 import io.vertx.circuitbreaker.CircuitBreakerOptions;
@@ -76,6 +80,9 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     @Autowired(required = false)
     @Qualifier("cockpitHelloCommandProducer")
     private CommandProducer helloCommandProducer;
+
+    @Autowired
+    private PluginManifest pluginManifest;
 
     private boolean closedByCockpit = false;
 
@@ -146,7 +153,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                     // The connection has been established.
                     if (event.succeeded()) {
                         final WebSocket webSocket = event.result();
-                        clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, ((Map) commandHandlers));
+                        clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, ((Map) commandHandlers), pluginManifest);
 
                         this.notifyOnConnectListeners();
 
@@ -156,7 +163,10 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                                 webSocket.close();
                             }
                         );
-                        clientChannel.init().subscribe(helloReply -> handleOnReadyNotification(null, helloReply));
+                        clientChannel
+                            .init()
+                            .doOnError(throwable -> log.error("An error occurred when initializing the web socket channel.", throwable))
+                            .subscribe(helloReply -> handleOnReadyNotification(null, helloReply));
 
                         // Initialize ping-pong
                         // See RFC 6455 Section <a href="https://tools.ietf.org/html/rfc6455#section-5.5.2"

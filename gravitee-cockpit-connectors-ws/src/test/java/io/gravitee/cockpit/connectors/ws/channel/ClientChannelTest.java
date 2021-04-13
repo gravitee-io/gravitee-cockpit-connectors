@@ -27,6 +27,7 @@ import io.gravitee.cockpit.api.command.organization.OrganizationCommand;
 import io.gravitee.cockpit.api.command.organization.OrganizationPayload;
 import io.gravitee.cockpit.connectors.ws.exceptions.ChannelClosedException;
 import io.gravitee.node.api.Node;
+import io.gravitee.plugin.core.api.PluginManifest;
 import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import io.vertx.core.Handler;
@@ -60,6 +61,9 @@ class ClientChannelTest {
     @Mock
     private Node node;
 
+    @Mock
+    private PluginManifest pluginManifest;
+
     @Captor
     ArgumentCaptor<Handler<Buffer>> listenCaptor;
 
@@ -71,7 +75,7 @@ class ClientChannelTest {
     public void init() {
         commandHandlers = new HashMap<>();
         when(webSocket.handler(listenCaptor.capture())).thenReturn(null);
-        cut = new ClientChannel(webSocket, node, null, commandHandlers);
+        cut = new ClientChannel(webSocket, node, null, commandHandlers, pluginManifest);
         cut.onClose(closeHandler);
         cut.init();
         verify(webSocket).write(any(Buffer.class), any(Handler.class));
@@ -171,7 +175,7 @@ class ClientChannelTest {
         final CommandProducer<HelloCommand, HelloReply> helloCommandCommandProducer = mock(CommandProducer.class);
         when(helloCommandCommandProducer.prepare(any(HelloCommand.class))).thenAnswer(i -> Single.just(i.getArgument(0)));
 
-        cut = new ClientChannel(webSocket, node, helloCommandCommandProducer, commandHandlers);
+        cut = new ClientChannel(webSocket, node, helloCommandCommandProducer, commandHandlers, pluginManifest);
         cut.init();
 
         setCommandHandler(Command.Type.ORGANIZATION_COMMAND, Reply.Type.ORGANIZATION_REPLY, CommandStatus.SUCCEEDED, false);

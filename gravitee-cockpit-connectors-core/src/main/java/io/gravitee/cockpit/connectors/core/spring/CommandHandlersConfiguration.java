@@ -19,6 +19,8 @@ import io.gravitee.cockpit.api.command.Command;
 import io.gravitee.cockpit.api.command.CommandHandler;
 import io.gravitee.cockpit.api.command.Reply;
 import io.gravitee.cockpit.connectors.core.internal.CommandHandlerWrapper;
+import io.gravitee.node.api.infos.PluginInfos;
+import io.gravitee.plugin.core.api.PluginRegistry;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.context.ApplicationContext;

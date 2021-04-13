@@ -42,6 +42,11 @@
             <artifactId>gravitee-node-vertx</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.gravitee.plugin</groupId>
+            <artifactId>gravitee-plugin-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Vert.x -->
         <dependency>
