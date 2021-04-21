@@ -152,6 +152,7 @@ public class MonitoringCollectorService implements InitializingBean {
         healthcheckPayload.setNodeId(monitoring.getNodeId());
         healthcheckPayload.setEvaluatedAt(healthCheck.getEvaluatedAt());
         healthcheckPayload.setProbes(probes);
+        healthcheckPayload.setHealthy(healthCheck.isHealthy());
         healthCheckCommand.setPayload(healthcheckPayload);
 
         return healthCheckCommand;

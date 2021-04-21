@@ -42,7 +42,7 @@
         <spring.version>5.2.7.RELEASE</spring.version>
         <gravitee-node.version>1.12.0</gravitee-node.version>
         <gravitee-plugin.version>1.16.0</gravitee-plugin.version>
-        <gravitee-cockpit-api.version>1.4.0</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>1.5.0-SNAPSHOT</gravitee-cockpit-api.version>
         <lombok.version>1.18.12</lombok.version>
         <mockito.version>3.4.2</mockito.version>
         <junit-jupiter.version>5.5.2</junit-jupiter.version>
