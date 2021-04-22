@@ -117,7 +117,11 @@ public class ClientChannel {
             .subscribe(
                 reply -> {
                     helloHandshakeDone.onSuccess(reply);
-                    log.info("HelloCommand replied with status [{}]", reply.getCommandStatus());
+                    log.info(
+                        "HelloCommand replied with status [{}]. Installation status is [{}]",
+                        reply.getCommandStatus(),
+                        reply.getInstallationStatus()
+                    );
 
                     if (shouldCloseConnection(reply)) {
                         closeHandler.handle();
