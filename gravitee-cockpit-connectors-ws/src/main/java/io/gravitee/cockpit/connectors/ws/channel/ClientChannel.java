@@ -100,7 +100,12 @@ public class ClientChannel {
                 }
             )
             .subscribe(
-                reply -> log.info("HelloCommand replied with status [{}]", reply.getCommandStatus()),
+                reply ->
+                    log.info(
+                        "HelloCommand replied with status [{}]. Installation status is [{}]",
+                        reply.getCommandStatus(),
+                        reply.getInstallationStatus()
+                    ),
                 t -> log.error("Unable to send HelloCommand", t)
             );
     }
