@@ -188,7 +188,7 @@ public class ClientChannel {
                         webSocket.close((short) 400, "Bad incoming content");
                     }
                 } catch (Exception e) {
-                    log.warn("An error occurred when trying to decode incoming content [{}]. Closing Socket.", incoming);
+                    log.warn(String.format("An error occurred when trying to decode incoming content [%s]. Closing Socket.", incoming), e);
                     webSocket.close((short) 500, "Unexpected error");
                 }
             }
