@@ -27,8 +27,13 @@ parameters:
     description: "Name of the S3 Bucket used to store and retrieve the state of the maven project, to perform the nexus staging ?"
   replayed_release:
     type: string
-    default: $GIO_RELEASE_VERSION
+    default: ''
     description: "What is the version number of the release you want to replay? (Mandatory, only for the 'standalone_release_replay' Workflow / see 'gio_action' pipeline parameter)"
+  package_bundle_version:
+    type: string
+    default: ''
+    description: "The release version in the https://github.com/gravitee-io/gravitee-cockpit git repo, for which to perform the package bundle"
+
 orbs:
   slack: circleci/slack@4.2.1
   gravitee: gravitee-io/gravitee@dev:1.0.4
