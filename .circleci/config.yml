@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   gio_action:
     type: enum
-    enum: [release, standalone_release, standalone_release_replay, nexus_staging, vm_nexus_staging, pull_requests]
+    enum: [release, standalone_release, standalone_release_replay, nexus_staging, package_bundle, pull_requests]
     default: pull_requests
   dry_run:
     type: boolean
@@ -27,8 +27,13 @@ parameters:
     description: "Name of the S3 Bucket used to store and retrieve the state of the maven project, to perform the nexus staging ?"
   replayed_release:
     type: string
-    default: $GIO_RELEASE_VERSION
+    default: ''
     description: "What is the version number of the release you want to replay? (Mandatory, only for the 'standalone_release_replay' Workflow / see 'gio_action' pipeline parameter)"
+  package_bundle_version:
+    type: string
+    default: ''
+    description: "The release version in the https://github.com/gravitee-io/gravitee-cockpit git repo, for which to perform the package bundle"
+
 orbs:
   slack: circleci/slack@4.2.1
   gravitee: gravitee-io/gravitee@dev:1.0.4
@@ -336,20 +341,6 @@ workflows:
           # container_gun_image_tag: '11.0.3-jdk-stretch'
           container_size: 'large'
 
-
-  # ---
-  # CICD Workflow For APIM Orchestrated Nexus Staging, VM-based
-  vm_nexus_staging:
-    when:
-      equal: [ vm_nexus_staging, << pipeline.parameters.gio_action >> ]
-    jobs:
-      - gravitee/nexus_staging:
-          context: cicd-orchestrator
-          secrethub_org: << pipeline.parameters.secrethub_org >>
-          secrethub_repo: << pipeline.parameters.secrethub_repo >>
-          maven_profile_id: << pipeline.parameters.maven_profile_id >>
-          s3_bucket_name: << pipeline.parameters.s3_bucket_name >>
-
   # ---
   # A nighlty release for all CE repositories
   nightly:
@@ -369,3 +360,18 @@ workflows:
           name: process_pull_request
           requires:
             - nightly_secrets_resolution
+
+  package_bundle:
+    when:
+      equal: [ package_bundle, << pipeline.parameters.gio_action >> ]
+    jobs:
+      - gravitee/d_cockpit_package_bundle_secrets:
+          name: package_bundle_secrets
+          context:
+            - cicd-orchestrator
+      - gravitee/d_cockpit_connectors_bundle:
+          requires:
+            - package_bundle_secrets
+          # maven_profile_id: "gio-release"
+          dry_run: << pipeline.parameters.dry_run >>
+          gio_release_version: << pipeline.parameters.package_bundle_version >>
