@@ -63,10 +63,6 @@ workflows:
           # container_gun_image_name: 'openjdk'
           # container_gun_image_tag: '11.0.3-jdk-stretch'
           container_size: 'medium'
-          filters:
-            branches:
-              ignore:
-                - master
   # ---
   # The 2 Workflows Below are there for the CICD Orchestrator to be able to
   # release Gravitee Kubernetes in an APIM release Process, with Docker executors instead of VMs
