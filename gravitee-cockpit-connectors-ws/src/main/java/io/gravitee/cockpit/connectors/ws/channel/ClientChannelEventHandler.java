@@ -15,6 +15,6 @@
  */
 package io.gravitee.cockpit.connectors.ws.channel;
 
-public interface ClientChannelCloseHandler {
+public interface ClientChannelEventHandler {
     void handle();
 }

@@ -51,7 +51,9 @@ public class ClientChannel {
     private final Node node;
     private final PluginManifest pluginManifest;
     private boolean goodbyeCommandReceived = false;
-    private ClientChannelCloseHandler closeHandler = () -> {};
+    private ClientChannelEventHandler closeHandler = () -> {};
+    private ClientChannelEventHandler onPrimaryHandler = () -> {};
+    private ClientChannelEventHandler onReplicaHandler = () -> {};
 
     public ClientChannel(
         WebSocket webSocket,
@@ -149,6 +151,18 @@ public class ClientChannel {
                     return;
                 }
 
+                if (incoming.startsWith(PRIMARY_MESSAGE)) {
+                    log.warn("I am the PRIMARY");
+                    this.onPrimaryHandler.handle();
+                    return;
+                }
+
+                if (incoming.startsWith(REPLICA_MESSAGE)) {
+                    log.warn("I am a replica");
+                    this.onReplicaHandler.handle();
+                    return;
+                }
+
                 try {
                     if (incoming.startsWith(COMMAND_PREFIX)) {
                         Command<?> command = Json.decodeValue(incoming.replace(COMMAND_PREFIX, ""), Command.class);
@@ -207,8 +221,16 @@ public class ClientChannel {
             .doOnDispose(() -> resultEmitters.remove(command.getId()));
     }
 
-    public void onClose(ClientChannelCloseHandler closeHandler) {
+    public void onClose(ClientChannelEventHandler closeHandler) {
         this.closeHandler = closeHandler;
+    }
+
+    public void onPrimary(ClientChannelEventHandler onPrimaryHandler) {
+        this.onPrimaryHandler = onPrimaryHandler;
+    }
+
+    public void onReplica(ClientChannelEventHandler onReplicaHandler) {
+        this.onReplicaHandler = onReplicaHandler;
     }
 
     void reply(Reply reply) {

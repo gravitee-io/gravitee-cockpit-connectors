@@ -56,7 +56,13 @@ class ClientChannelTest {
     private WebSocket webSocket;
 
     @Mock
-    private ClientChannelCloseHandler closeHandler;
+    private ClientChannelEventHandler closeHandler;
+
+    @Mock
+    private ClientChannelEventHandler onPrimaryHandler;
+
+    @Mock
+    private ClientChannelEventHandler onReplicaHandler;
 
     @Mock
     private Node node;
@@ -77,6 +83,8 @@ class ClientChannelTest {
         when(webSocket.handler(listenCaptor.capture())).thenReturn(null);
         cut = new ClientChannel(webSocket, node, null, commandHandlers, pluginManifest);
         cut.onClose(closeHandler);
+        cut.onPrimary(onPrimaryHandler);
+        cut.onReplica(onReplicaHandler);
         cut.init();
         verify(webSocket).write(any(Buffer.class), any(Handler.class));
     }
@@ -85,6 +93,22 @@ class ClientChannelTest {
     public void listenPingPong() {
         listenCaptor.getValue().handle(Buffer.buffer("ping_pong: "));
 
+        verifyNoMoreInteractions(webSocket);
+    }
+
+    @Test
+    public void listenPrimary() {
+        listenCaptor.getValue().handle(Buffer.buffer(Command.PRIMARY_MESSAGE));
+
+        verify(onPrimaryHandler).handle();
+        verifyNoMoreInteractions(webSocket);
+    }
+
+    @Test
+    public void listenReplica() {
+        listenCaptor.getValue().handle(Buffer.buffer(Command.REPLICA_MESSAGE));
+
+        verify(onReplicaHandler).handle();
         verifyNoMoreInteractions(webSocket);
     }
 

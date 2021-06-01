@@ -92,6 +92,11 @@ public class MonitoringCollectorService implements InitializingBean {
             return;
         }
 
+        if (!cockpitConnector.isPrimary()) {
+            log.debug("Cockpit connector is not primary. Skip monitoring propagation.");
+            return;
+        }
+
         long nextLastRefreshAt = System.currentTimeMillis();
 
         log.debug("Collecting and sending monitoring data to Cockpit");
