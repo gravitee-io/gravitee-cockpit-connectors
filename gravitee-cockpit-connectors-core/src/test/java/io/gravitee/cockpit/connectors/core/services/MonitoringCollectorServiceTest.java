@@ -33,7 +33,6 @@ import io.gravitee.node.api.healthcheck.Result;
 import io.gravitee.node.api.infos.NodeInfos;
 import io.gravitee.node.api.infos.NodeStatus;
 import io.gravitee.node.api.infos.PluginInfos;
-import io.gravitee.node.api.monitor.JvmInfo;
 import io.gravitee.node.api.monitor.Monitor;
 import io.gravitee.node.monitoring.NodeMonitoringService;
 import io.reactivex.Flowable;
@@ -70,6 +69,8 @@ class MonitoringCollectorServiceTest {
 
     @BeforeEach
     public void initMocks() {
+        lenient().when(cockpitConnector.isPrimary()).thenReturn(true);
+
         cut = new MonitoringCollectorService(nodeMonitoringService, cockpitConnector, taskScheduler, objectMapper);
         cut.ready = true;
     }
@@ -79,6 +80,14 @@ class MonitoringCollectorServiceTest {
         cut.ready = false;
         cut.collectAndSend();
         verifyNoInteractions(objectMapper, nodeMonitoringService, cockpitConnector);
+    }
+
+    @Test
+    public void collectAndSend_notPrimary() {
+        when(cockpitConnector.isPrimary()).thenReturn(false);
+
+        cut.collectAndSend();
+        verifyNoInteractions(objectMapper, nodeMonitoringService);
     }
 
     @Test

@@ -43,6 +43,7 @@ import io.vertx.core.http.WebSocket;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -84,6 +85,9 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     @Autowired
     private PluginManifest pluginManifest;
 
+    @Getter
+    private boolean isPrimary = false;
+
     private boolean closedByCockpit = false;
 
     private long pongHandlerId;
@@ -99,12 +103,16 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     private final Collection<Runnable> onConnectListeners;
     private final Collection<Runnable> onDisconnectListeners;
     private final Collection<Runnable> onReadyListeners;
+    private final Collection<Runnable> onPrimaryListeners;
+    private final Collection<Runnable> onReplicaListeners;
 
     public WebSocketCockpitConnector() {
         this.path = "/ws/controller";
         onConnectListeners = new ConcurrentLinkedQueue<>();
         onDisconnectListeners = new ConcurrentLinkedQueue<>();
         onReadyListeners = new ConcurrentLinkedQueue<>();
+        onPrimaryListeners = new ConcurrentLinkedQueue<>();
+        onReplicaListeners = new ConcurrentLinkedQueue<>();
     }
 
     @Override
@@ -145,6 +153,16 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
         onReadyListeners.add(runnable);
     }
 
+    @Override
+    public void registerOnPrimary(Runnable runnable) {
+        onPrimaryListeners.add(runnable);
+    }
+
+    @Override
+    public void registerOnReplica(Runnable runnable) {
+        onReplicaListeners.add(runnable);
+    }
+
     private void connect() {
         circuitBreaker
             .execute(this::doConnect)
@@ -163,6 +181,20 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                                 webSocket.close();
                             }
                         );
+
+                        clientChannel.onPrimary(
+                            () -> {
+                                this.isPrimary = true;
+                                notifyOnPrimaryListeners();
+                            }
+                        );
+                        clientChannel.onReplica(
+                            () -> {
+                                this.isPrimary = false;
+                                notifyOnReplicaListeners();
+                            }
+                        );
+
                         clientChannel
                             .init()
                             .doOnError(throwable -> log.error("An error occurred when initializing the web socket channel.", throwable))
@@ -228,6 +260,16 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     private void notifyOnReadyListeners() {
         log.debug("Notifying all OnReady listeners.");
         onReadyListeners.forEach(Runnable::run);
+    }
+
+    private void notifyOnPrimaryListeners() {
+        log.debug("Notifying all OnPrimary listeners.");
+        onPrimaryListeners.forEach(Runnable::run);
+    }
+
+    private void notifyOnReplicaListeners() {
+        log.debug("Notifying all OnReplica listeners.");
+        onReplicaListeners.forEach(Runnable::run);
     }
 
     private void doConnect(Promise<WebSocket> promise) {
