@@ -166,11 +166,11 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     private void connect() {
         circuitBreaker
             .execute(this::doConnect)
-            .setHandler(
-                event -> {
+            .onComplete(
+                result -> {
                     // The connection has been established.
-                    if (event.succeeded()) {
-                        final WebSocket webSocket = event.result();
+                    if (result.succeeded()) {
+                        final WebSocket webSocket = result.result();
                         clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, ((Map) commandHandlers), pluginManifest);
 
                         this.notifyOnConnectListeners();
