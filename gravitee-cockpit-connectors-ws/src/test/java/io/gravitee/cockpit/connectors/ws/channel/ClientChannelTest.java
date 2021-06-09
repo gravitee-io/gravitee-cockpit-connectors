@@ -123,7 +123,7 @@ class ClientChannelTest {
     public void listenDecodeException() {
         listenCaptor.getValue().handle(Buffer.buffer("reply: invalid"));
 
-        verify(webSocket).close(eq((short) 500), eq("Unexpected error"));
+        verifyNoMoreInteractions(webSocket);
     }
 
     @Test
