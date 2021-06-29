@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.api.command.*;
 import io.gravitee.cockpit.api.command.goodbye.GoodbyeCommand;
 import io.gravitee.cockpit.api.command.hello.HelloCommand;
@@ -75,13 +76,14 @@ class ClientChannelTest {
 
     HashMap<Command.Type, CommandHandler<Command<?>, Reply>> commandHandlers;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private ClientChannel cut;
 
     @BeforeEach
     public void init() {
         commandHandlers = new HashMap<>();
         when(webSocket.handler(listenCaptor.capture())).thenReturn(null);
-        cut = new ClientChannel(webSocket, node, null, commandHandlers, pluginManifest);
+        cut = new ClientChannel(webSocket, node, null, commandHandlers, pluginManifest, objectMapper);
         cut.onClose(closeHandler);
         cut.onPrimary(onPrimaryHandler);
         cut.onReplica(onReplicaHandler);
@@ -199,7 +201,7 @@ class ClientChannelTest {
         final CommandProducer<HelloCommand, HelloReply> helloCommandCommandProducer = mock(CommandProducer.class);
         when(helloCommandCommandProducer.prepare(any(HelloCommand.class))).thenAnswer(i -> Single.just(i.getArgument(0)));
 
-        cut = new ClientChannel(webSocket, node, helloCommandCommandProducer, commandHandlers, pluginManifest);
+        cut = new ClientChannel(webSocket, node, helloCommandCommandProducer, commandHandlers, pluginManifest, objectMapper);
         cut.init();
 
         setCommandHandler(Command.Type.ORGANIZATION_COMMAND, Reply.Type.ORGANIZATION_REPLY, CommandStatus.SUCCEEDED, false);
