@@ -18,6 +18,8 @@ package io.gravitee.cockpit.connectors.ws.channel;
 import static io.gravitee.cockpit.api.command.Command.*;
 import static io.gravitee.cockpit.api.command.CommandStatus.ERROR;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.api.command.*;
 import io.gravitee.cockpit.api.command.hello.HelloCommand;
 import io.gravitee.cockpit.api.command.hello.HelloPayload;
@@ -31,7 +33,6 @@ import io.reactivex.*;
 import io.reactivex.subjects.SingleSubject;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
-import io.vertx.core.json.Json;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,7 @@ public class ClientChannel {
 
     private final Node node;
     private final PluginManifest pluginManifest;
+    private final ObjectMapper objectMapper;
     private boolean goodbyeCommandReceived = false;
     private ClientChannelEventHandler closeHandler = () -> {};
     private ClientChannelEventHandler onPrimaryHandler = () -> {};
@@ -60,11 +62,13 @@ public class ClientChannel {
         Node node,
         CommandProducer<HelloCommand, HelloReply> helloCommandProducer,
         Map<Type, CommandHandler<Command<?>, Reply>> commandHandlers,
-        PluginManifest pluginManifest
+        PluginManifest pluginManifest,
+        ObjectMapper objectMapper
     ) {
         this.webSocket = webSocket;
         this.node = node;
         this.pluginManifest = pluginManifest;
+        this.objectMapper = objectMapper;
         this.resultEmitters = new ConcurrentHashMap<>();
         this.helloCommandProducer = helloCommandProducer;
         this.commandHandlers = commandHandlers;
@@ -165,7 +169,7 @@ public class ClientChannel {
 
                 try {
                     if (incoming.startsWith(COMMAND_PREFIX)) {
-                        Command<?> command = Json.decodeValue(incoming.replace(COMMAND_PREFIX, ""), Command.class);
+                        Command<?> command = decodeJsonString(incoming.replace(COMMAND_PREFIX, ""), Command.class);
                         CommandHandler<Command<?>, Reply> commandHandler = commandHandlers.get(command.getType());
 
                         if (command.getType().equals(Type.GOODBYE_COMMAND)) {
@@ -192,7 +196,7 @@ public class ClientChannel {
                             reply(new IgnoredReply(command.getId()));
                         }
                     } else if (incoming.startsWith(REPLY_PREFIX)) {
-                        Reply reply = Json.decodeValue(incoming.replace(REPLY_PREFIX, ""), Reply.class);
+                        Reply reply = decodeJsonString(incoming.replace(REPLY_PREFIX, ""), Reply.class);
                         SingleEmitter<Reply> emitter = resultEmitters.remove(reply.getCommandId());
 
                         if (emitter != null) {
@@ -232,9 +236,9 @@ public class ClientChannel {
         this.onReplicaHandler = onReplicaHandler;
     }
 
-    void reply(Reply reply) {
+    void reply(Reply reply) throws JsonProcessingException {
         this.webSocket.write(
-                Buffer.buffer(REPLY_PREFIX + Json.encode(reply)),
+                Buffer.buffer(REPLY_PREFIX + toJsonString(reply)),
                 avoid -> {
                     if (avoid.failed()) {
                         log.error("An error occurred when trying to reply [{}]. Closing socket.", reply);
@@ -250,7 +254,7 @@ public class ClientChannel {
         return Completable.create(
             emitter ->
                 this.webSocket.write(
-                        Buffer.buffer(COMMAND_PREFIX + Json.encode(command)),
+                        Buffer.buffer(COMMAND_PREFIX + toJsonString(command)),
                         avoid -> {
                             if (avoid.failed()) {
                                 log.error("An error occurred when trying to send command [{}]", command);
@@ -267,5 +271,13 @@ public class ClientChannel {
     private boolean shouldCloseConnection(HelloReply reply) {
         String installationStatus = reply.getInstallationStatus();
         return installationStatus.equals("DELETED") || installationStatus.equals("INCOMPATIBLE");
+    }
+
+    private String toJsonString(Object object) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(object);
+    }
+
+    private <T> T decodeJsonString(String content, Class<T> clazz) throws JsonProcessingException {
+        return objectMapper.readValue(content, clazz);
     }
 }

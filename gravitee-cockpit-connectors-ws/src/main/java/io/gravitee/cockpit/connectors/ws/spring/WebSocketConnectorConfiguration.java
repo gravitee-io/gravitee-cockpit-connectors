@@ -15,6 +15,7 @@
  */
 package io.gravitee.cockpit.connectors.ws.spring;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.connectors.core.spring.CommandHandlersConfiguration;
 import io.gravitee.cockpit.connectors.core.spring.MonitoringCollectorConfiguration;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientConfiguration;
@@ -56,5 +57,10 @@ public class WebSocketConnectorConfiguration {
             .findFirst()
             .get()
             .manifest();
+    }
+
+    @Bean("cockpitObjectMapper")
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }
