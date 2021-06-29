@@ -15,6 +15,7 @@
  */
 package io.gravitee.cockpit.connectors.ws.spring;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.connectors.core.spring.CommandHandlersConfiguration;
 import io.gravitee.cockpit.connectors.core.spring.MonitoringCollectorConfiguration;
@@ -61,6 +62,8 @@ public class WebSocketConnectorConfiguration {
 
     @Bean("cockpitObjectMapper")
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
+        return mapper;
     }
 }
