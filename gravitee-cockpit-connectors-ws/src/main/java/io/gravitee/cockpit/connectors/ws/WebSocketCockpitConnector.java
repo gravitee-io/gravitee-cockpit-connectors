@@ -17,6 +17,7 @@ package io.gravitee.cockpit.connectors.ws;
 
 import static io.gravitee.cockpit.api.command.Command.PING_PONG_PREFIX;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.api.CockpitConnector;
 import io.gravitee.cockpit.api.command.Command;
 import io.gravitee.cockpit.api.command.CommandProducer;
@@ -84,6 +85,10 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
     @Autowired
     private PluginManifest pluginManifest;
+
+    @Autowired
+    @Qualifier("cockpitObjectMapper")
+    private ObjectMapper objectMapper;
 
     @Getter
     private boolean isPrimary = false;
@@ -171,7 +176,8 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                     // The connection has been established.
                     if (event.succeeded()) {
                         final WebSocket webSocket = event.result();
-                        clientChannel = new ClientChannel(webSocket, node, helloCommandProducer, ((Map) commandHandlers), pluginManifest);
+                        clientChannel =
+                            new ClientChannel(webSocket, node, helloCommandProducer, ((Map) commandHandlers), pluginManifest, objectMapper);
 
                         this.notifyOnConnectListeners();
 
