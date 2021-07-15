@@ -41,7 +41,7 @@
     <properties>
         <gravitee-bom.version>1.0</gravitee-bom.version>
         <spring.version>5.2.7.RELEASE</spring.version>
-        <gravitee-node.version>1.14.0-SNAPSHOT</gravitee-node.version>
+        <gravitee-node.version>1.15.1</gravitee-node.version>
         <gravitee-plugin.version>1.16.0</gravitee-plugin.version>
         <gravitee-cockpit-api.version>1.6.0-SNAPSHOT</gravitee-cockpit-api.version>
         <lombok.version>1.18.12</lombok.version>
