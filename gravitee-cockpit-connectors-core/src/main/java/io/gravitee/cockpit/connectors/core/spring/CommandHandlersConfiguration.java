@@ -19,17 +19,17 @@ import io.gravitee.cockpit.api.command.Command;
 import io.gravitee.cockpit.api.command.CommandHandler;
 import io.gravitee.cockpit.api.command.Reply;
 import io.gravitee.cockpit.connectors.core.internal.CommandHandlerWrapper;
-import io.gravitee.node.api.infos.PluginInfos;
-import io.gravitee.plugin.core.api.PluginRegistry;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
+@ComponentScan("io.gravitee.cockpit.connectors.core.handlers")
 public class CommandHandlersConfiguration {
 
     @Bean("cockpitCommandHandlers")
