@@ -40,7 +40,7 @@
 
     <properties>
         <gravitee-bom.version>1.4</gravitee-bom.version>
-        <spring.version>5.2.7.RELEASE</spring.version>
+        <spring.version>5.3.10</spring.version>
         <gravitee-node.version>1.16.1</gravitee-node.version>
         <gravitee-plugin.version>1.16.0</gravitee-plugin.version>
         <gravitee-alert-api.version>1.7.1</gravitee-alert-api.version>
