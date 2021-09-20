@@ -40,7 +40,6 @@
 
     <properties>
         <gravitee-bom.version>1.4</gravitee-bom.version>
-        <spring.version>5.2.7.RELEASE</spring.version>
         <gravitee-node.version>1.16.1</gravitee-node.version>
         <gravitee-plugin.version>1.16.0</gravitee-plugin.version>
         <gravitee-alert-api.version>1.7.1</gravitee-alert-api.version>
@@ -53,16 +52,6 @@
 
     <dependencyManagement>
         <dependencies>
-
-            <!-- Reimport spring bom due to version override -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <version>${spring.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
             <!-- Import bom to properly inherit all dependencies -->
             <dependency>
                 <groupId>io.gravitee</groupId>
