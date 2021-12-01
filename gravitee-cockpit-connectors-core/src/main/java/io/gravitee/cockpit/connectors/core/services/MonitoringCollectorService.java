@@ -138,7 +138,9 @@ public class MonitoringCollectorService implements InitializingBean {
         nodePayload.setStatus(NodePayload.Status.valueOf(nodeInfos.getStatus().name()));
         nodePayload.setVersion(nodeInfos.getVersion());
         nodePayload.setShardingTags(
-            nodeInfos.getTags() == null ? List.of() : nodeInfos.getTags().stream().filter(tag -> tag.isBlank()).collect(Collectors.toList())
+            nodeInfos.getTags() == null
+                ? List.of()
+                : nodeInfos.getTags().stream().filter(tag -> !tag.isBlank()).collect(Collectors.toList())
         );
         nodePayload.setTenant(nodeInfos.getTenant());
         nodePayload.setJdkVersion(nodeInfos.getJdkVersion());
