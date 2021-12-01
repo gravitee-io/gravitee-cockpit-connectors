@@ -15,6 +15,7 @@
  */
 package io.gravitee.cockpit.connectors.core.services;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -39,9 +40,13 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.TaskScheduler;
@@ -66,6 +71,9 @@ class MonitoringCollectorServiceTest {
     private ObjectMapper objectMapper;
 
     private MonitoringCollectorService cut;
+
+    @Captor
+    private ArgumentCaptor<Command> commandArgumentCaptor;
 
     @BeforeEach
     public void initMocks() {
@@ -108,6 +116,7 @@ class MonitoringCollectorServiceTest {
         pluginInfos.setPlugin("plugin");
 
         nodeInfos.setPluginInfos(Collections.singleton(pluginInfos));
+        nodeInfos.setTags(List.of("tag1", "tag2", ""));
 
         final HealthCheck healthCheck = new HealthCheck();
         final HashMap<String, Result> results = new HashMap<>();
@@ -142,8 +151,17 @@ class MonitoringCollectorServiceTest {
 
         cut.collectAndSend();
 
-        verify(cockpitConnector).sendCommand(any(NodeCommand.class));
-        verify(cockpitConnector).sendCommand(any(HealthCheckCommand.class));
-        verify(cockpitConnector).sendCommand(any(MonitoringCommand.class));
+        verify(cockpitConnector, times(3)).sendCommand(commandArgumentCaptor.capture());
+
+        List<Command> commands = commandArgumentCaptor.getAllValues();
+
+        assertThat(commands.stream().filter(cmd -> cmd.getType() == Command.Type.MONITORING_COMMAND).findAny().isPresent()).isTrue();
+        assertThat(commands.stream().filter(cmd -> cmd.getType() == Command.Type.HEALTHCHECK_COMMAND).findAny().isPresent()).isTrue();
+
+        Optional<Command> optionalNodeCommand = commands.stream().filter(cmd -> cmd.getType() == Command.Type.NODE_COMMAND).findAny();
+        assertThat(optionalNodeCommand.isPresent()).isTrue();
+        NodeCommand nodeCommand = (NodeCommand) optionalNodeCommand.get();
+        assertThat(nodeCommand.getPayload().getShardingTags().size()).isEqualTo(2);
+        assertThat(nodeCommand.getPayload().getShardingTags()).contains("tag1", "tag2");
     }
 }
