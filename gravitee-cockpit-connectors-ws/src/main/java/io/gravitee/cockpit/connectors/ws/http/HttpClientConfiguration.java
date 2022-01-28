@@ -94,14 +94,14 @@ public class HttpClientConfiguration {
     }
 
     private List<WebSocketEndpoint> initializeEndpoints() {
-        String key = String.format("cockpit.ws.endpoints[%s]", 0);
+        String key = String.format("cockpit_ws_endpoints_%s", 0);
         List<WebSocketEndpoint> endpoints = new ArrayList<>();
 
         while (environment.containsProperty(key)) {
             String url = environment.getProperty(key);
             endpoints.add(new WebSocketEndpoint(url));
 
-            key = String.format("cockpit.ws.endpoints[%s]", endpoints.size());
+            key = String.format("cockpit_ws_endpoints_%s", endpoints.size());
         }
 
         return endpoints;
