@@ -39,7 +39,7 @@
     </modules>
 
     <properties>
-        <gravitee-bom.version>2.2</gravitee-bom.version>
+        <gravitee-bom.version>2.3</gravitee-bom.version>
         <gravitee-node.version>1.20.1</gravitee-node.version>
         <gravitee-plugin.version>1.22.0</gravitee-plugin.version>
         <gravitee-alert-api.version>1.9.0</gravitee-alert-api.version>
