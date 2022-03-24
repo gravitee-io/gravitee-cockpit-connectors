@@ -1,7 +1,14 @@
 {
-    "extends": ["config:base"],
-    "prConcurrentLimit": 3,
-    "dependencyDashboard": true,
-    "commitMessageTopic": "{{depName}}",
-    "packageRules": []
+  "extends": [
+    "config:base",
+    "schedule:earlyMondays"
+  ],
+  "prConcurrentLimit": 3,
+  "rebaseWhen": "conflicted",
+  "packageRules": [
+    {
+      "matchDatasources": ["orb"],
+      "rangeStrategy": "replace"
+    }
+  ]
 }
