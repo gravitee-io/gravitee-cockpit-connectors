@@ -30,6 +30,11 @@
     <artifactId>gravitee-cockpit-connectors-ws</artifactId>
     <name>Gravitee.io - Cockpit - Connectors - WebSocket</name>
 
+    <properties>
+        <!-- Property used by the publication job in CI-->
+        <publish-folder-path>graviteeio-cockpit/plugins/connectors</publish-folder-path>
+    </properties>
+
     <dependencies>
         <!-- Gravitee dependencies -->
         <dependency>
