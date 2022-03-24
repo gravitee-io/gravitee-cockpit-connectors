@@ -1,10 +1,10 @@
 **Issue**
 
-https://github.com/gravitee-io/issues/issues/XXXXX
+https://github.com/gravitee-io/gravitee-cockpit-connectors/issues/XXXXX
 
 **Description**
 
-A small description of what you did in that PR.
+A small description of what you did in this PR.
 
 **Additional context**
 
