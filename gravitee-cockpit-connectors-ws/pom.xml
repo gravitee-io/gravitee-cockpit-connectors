@@ -32,7 +32,7 @@
 
     <properties>
         <!-- Property used by the publication job in CI-->
-        <publish-folder-path>graviteeio-cockpit/plugins/connectors</publish-folder-path>
+        <publish-folder-path>graviteeio-apim/plugins/connectors</publish-folder-path>
     </properties>
 
     <dependencies>
