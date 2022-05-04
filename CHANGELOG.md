@@ -1,3 +1,10 @@
+## [2.3.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.3.3...2.3.4) (2022-05-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency org.projectlombok:lombok to v1.18.24 ([b1e9a2b](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/b1e9a2b74dc30f22996d532f20e2c9f6ac17067b))
+
 ## [2.3.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.3.2...2.3.3) (2022-04-19)
 
 
