@@ -43,7 +43,7 @@
         <gravitee-node.version>1.22.0</gravitee-node.version>
         <gravitee-plugin.version>1.22.0</gravitee-plugin.version>
         <gravitee-alert-api.version>1.9.0</gravitee-alert-api.version>
-        <gravitee-cockpit-api.version>1.10.0</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>1.11.0</gravitee-cockpit-api.version>
         <lombok.version>1.18.24</lombok.version>
         <mockito.version>4.6.0</mockito.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
