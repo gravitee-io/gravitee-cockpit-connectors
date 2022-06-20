@@ -1,3 +1,10 @@
+## [2.3.8](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.3.7...2.3.8) (2022-06-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee.node:gravitee-node to v1.24.2 ([911b9e8](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/911b9e8c5fd82cc2d0e92ad1376dac79af7d57b1))
+
 ## [2.3.7](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.3.6...2.3.7) (2022-06-16)
 
 
