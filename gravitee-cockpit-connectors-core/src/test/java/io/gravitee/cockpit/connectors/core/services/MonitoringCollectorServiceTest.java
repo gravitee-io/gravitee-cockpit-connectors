@@ -20,13 +20,10 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.api.CockpitConnector;
 import io.gravitee.cockpit.api.command.Command;
-import io.gravitee.cockpit.api.command.healthcheck.HealthCheckCommand;
 import io.gravitee.cockpit.api.command.ignored.IgnoredReply;
-import io.gravitee.cockpit.api.command.monitoring.MonitoringCommand;
 import io.gravitee.cockpit.api.command.node.NodeCommand;
 import io.gravitee.node.api.Monitoring;
 import io.gravitee.node.api.healthcheck.HealthCheck;
@@ -34,7 +31,6 @@ import io.gravitee.node.api.healthcheck.Result;
 import io.gravitee.node.api.infos.NodeInfos;
 import io.gravitee.node.api.infos.NodeStatus;
 import io.gravitee.node.api.infos.PluginInfos;
-import io.gravitee.node.api.monitor.Monitor;
 import io.gravitee.node.monitoring.NodeMonitoringService;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -123,12 +119,8 @@ class MonitoringCollectorServiceTest {
         results.put("test", Result.healthy("OK"));
         healthCheck.setResults(results);
 
-        final Monitor nodeMonitor = new Monitor.Builder().on(nodeId).at(System.currentTimeMillis()).build();
-
-        when(objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)).thenReturn(objectMapper);
         when(objectMapper.readValue("nodeInfosPayload", NodeInfos.class)).thenReturn(nodeInfos);
         when(objectMapper.readValue("healthCheckPayload", HealthCheck.class)).thenReturn(healthCheck);
-        when(objectMapper.readValue("monitoringPayload", Monitor.class)).thenReturn(nodeMonitor);
         when(cockpitConnector.sendCommand(any(Command.class))).thenReturn(Single.just(new IgnoredReply()));
 
         final Monitoring nodeInfosMonitoring = new Monitoring();
@@ -143,19 +135,12 @@ class MonitoringCollectorServiceTest {
         when(nodeMonitoringService.findByTypeAndTimeframe(eq(Monitoring.HEALTH_CHECK), anyLong(), anyLong()))
             .thenReturn(Flowable.just(healthCheckMonitoring));
 
-        final Monitoring monitoringData = new Monitoring();
-        monitoringData.setPayload("monitoringPayload");
-
-        when(nodeMonitoringService.findByTypeAndTimeframe(eq(Monitoring.MONITOR), anyLong(), anyLong()))
-            .thenReturn(Flowable.just(monitoringData));
-
         cut.collectAndSend();
 
-        verify(cockpitConnector, times(3)).sendCommand(commandArgumentCaptor.capture());
+        verify(cockpitConnector, times(2)).sendCommand(commandArgumentCaptor.capture());
 
         List<Command> commands = commandArgumentCaptor.getAllValues();
 
-        assertThat(commands.stream().filter(cmd -> cmd.getType() == Command.Type.MONITORING_COMMAND).findAny().isPresent()).isTrue();
         assertThat(commands.stream().filter(cmd -> cmd.getType() == Command.Type.HEALTHCHECK_COMMAND).findAny().isPresent()).isTrue();
 
         Optional<Command> optionalNodeCommand = commands.stream().filter(cmd -> cmd.getType() == Command.Type.NODE_COMMAND).findAny();
