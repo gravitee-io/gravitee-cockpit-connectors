@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.3.8...2.4.0) (2022-06-22)
+
+
+### Features
+
+* stop collecting node monitoring data ([e63299e](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/e63299ea67ebc5c48ac86d1c584e2e205a91aef8))
+
 ## [2.3.8](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.3.7...2.3.8) (2022-06-20)
 
 
