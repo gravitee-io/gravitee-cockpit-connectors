@@ -1,3 +1,10 @@
+## [2.4.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.3...2.4.4) (2022-07-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee.plugin:gravitee-plugin to v1.24.1 ([b61dd5a](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/b61dd5a12848f662cf0305bf1c886f85f1bbec17))
+
 ## [2.4.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.2...2.4.3) (2022-07-27)
 
 
