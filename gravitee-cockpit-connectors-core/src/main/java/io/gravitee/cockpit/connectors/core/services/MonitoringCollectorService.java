@@ -93,26 +93,28 @@ public class MonitoringCollectorService implements InitializingBean {
             return;
         }
 
+        long from = lastRefreshAt - lastDelay;
         long nextLastRefreshAt = System.currentTimeMillis();
 
         log.debug("Collecting and sending monitoring data to Cockpit");
 
         // First send node infos.
         nodeMonitoringService
-            .findByTypeAndTimeframe(Monitoring.NODE_INFOS, lastRefreshAt - lastDelay, nextLastRefreshAt)
+            .findByTypeAndTimeframe(Monitoring.NODE_INFOS, from, nextLastRefreshAt)
             .map(this::convertToNodeCommand)
             .flatMapSingle(cockpitConnector::sendCommand)
             .blockingSubscribe();
 
         // Then send health checks.
         nodeMonitoringService
-            .findByTypeAndTimeframe(Monitoring.HEALTH_CHECK, lastRefreshAt - lastDelay, nextLastRefreshAt)
+            .findByTypeAndTimeframe(Monitoring.HEALTH_CHECK, from, nextLastRefreshAt)
             .map(this::convertToHealthCheckCommand)
             .flatMapSingle(cockpitConnector::sendCommand)
             .blockingSubscribe();
 
         lastRefreshAt = nextLastRefreshAt;
-        lastDelay = System.currentTimeMillis() - nextLastRefreshAt;
+        // Adding one second delay to make sure we don't miss events
+        lastDelay = System.currentTimeMillis() - nextLastRefreshAt + ChronoUnit.SECONDS.getDuration().toMillis();
     }
 
     private NodeCommand convertToNodeCommand(Monitoring monitoring) throws JsonProcessingException {
