@@ -1,3 +1,10 @@
+## [2.4.9](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.8...2.4.9) (2022-09-02)
+
+
+### Bug Fixes
+
+* add some overlap in the collector service ([3813e77](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/3813e77e03e33e6eac88476944139951fa52bee9))
+
 ## [2.4.8](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.7...2.4.8) (2022-08-15)
 
 
