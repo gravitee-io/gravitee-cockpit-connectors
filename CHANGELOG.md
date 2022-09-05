@@ -1,3 +1,10 @@
+## [2.4.10](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.9...2.4.10) (2022-09-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee:gravitee-parent to v20.4 ([00e07b2](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/00e07b2a3cbb83d201b9cd49c8659f1cc4eca2b6))
+
 ## [2.4.9](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.8...2.4.9) (2022-09-02)
 
 
