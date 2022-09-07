@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.10...2.5.0) (2022-09-07)
+
+
+### Features
+
+* remove alert feature ([5804194](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/580419457372621d981ab5e3f625d34afa7abff1))
+
 ## [2.4.10](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.9...2.4.10) (2022-09-05)
 
 
