@@ -17,7 +17,6 @@ package io.gravitee.cockpit.connectors.ws.spring;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.gravitee.cockpit.connectors.core.spring.AlertManagementConfiguration;
 import io.gravitee.cockpit.connectors.core.spring.CommandHandlersConfiguration;
 import io.gravitee.cockpit.connectors.core.spring.MonitoringCollectorConfiguration;
 import io.gravitee.cockpit.connectors.ws.http.HttpClientConfiguration;
@@ -35,7 +34,7 @@ import org.springframework.core.env.Environment;
  * @author GraviteeSource Team
  */
 @Configuration
-@Import({ CommandHandlersConfiguration.class, MonitoringCollectorConfiguration.class, AlertManagementConfiguration.class })
+@Import({ CommandHandlersConfiguration.class, MonitoringCollectorConfiguration.class })
 public class WebSocketConnectorConfiguration {
 
     public static final String COCKPIT_CONNECTORS_WS_PLUGIN_ID = "cockpit-connectors-ws";
