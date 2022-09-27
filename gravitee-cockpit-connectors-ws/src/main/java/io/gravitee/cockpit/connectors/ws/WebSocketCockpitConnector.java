@@ -33,7 +33,7 @@ import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.node.api.Node;
 import io.gravitee.plugin.core.api.PluginManifest;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import io.vertx.circuitbreaker.CircuitBreaker;
 import io.vertx.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Promise;
