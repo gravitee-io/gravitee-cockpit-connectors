@@ -18,7 +18,7 @@ package io.gravitee.cockpit.connectors.core.internal;
 import io.gravitee.cockpit.api.command.Command;
 import io.gravitee.cockpit.api.command.CommandHandler;
 import io.gravitee.cockpit.api.command.Reply;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import java.util.function.BiConsumer;
 
 /**
