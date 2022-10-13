@@ -1,3 +1,12 @@
+## [2.5.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.0...2.5.1) (2022-10-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee:gravitee-bom to v2.8 ([3333a28](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/3333a2888add77e2bea2a5b7b341a882f98a4f41))
+* **deps:** update dependency io.gravitee:gravitee-parent to v20.5 ([2f5bf7d](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/2f5bf7d7f64d5ed15aeb92b13566e433408dfb9d))
+* **deps:** update dependency io.gravitee.node:gravitee-node to v1.27.1 ([989b50e](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/989b50e25434b1d10b162c04a14777791811f525))
+
 # [2.5.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.4.10...2.5.0) (2022-09-07)
 
 
