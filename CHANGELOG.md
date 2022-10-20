@@ -1,3 +1,17 @@
+# [3.0.0-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.1...3.0.0-alpha.1) (2022-10-20)
+
+
+### Code Refactoring
+
+* move to RxJava3 ([05fee67](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/05fee671ab2573448ee92cfe191ae749d7c6575e))
+
+
+### BREAKING CHANGES
+
+* rxJava3 required
+
+https://graviteedevops.atlassian.net/browse/COC-49
+
 ## [2.5.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.0...2.5.1) (2022-10-13)
 
 
