@@ -1,3 +1,15 @@
+# [3.0.0-alpha.2](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.0-alpha.1...3.0.0-alpha.2) (2022-10-20)
+
+
+### chore
+
+* bump to rxJava3 ([d241cd4](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/d241cd4fe78c74adf4def3f4261809eed3926f22))
+
+
+### BREAKING CHANGES
+
+* rxJava3 required
+
 # [3.0.0-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.1...3.0.0-alpha.1) (2022-10-20)
 
 
