@@ -82,13 +82,13 @@ class ClientChannelTest {
     @BeforeEach
     public void init() {
         commandHandlers = new HashMap<>();
-        when(webSocket.handler(listenCaptor.capture())).thenReturn(null);
+        when(webSocket.binaryMessageHandler(listenCaptor.capture())).thenReturn(null);
         cut = new ClientChannel(webSocket, node, null, commandHandlers, pluginManifest, objectMapper);
         cut.onClose(closeHandler);
         cut.onPrimary(onPrimaryHandler);
         cut.onReplica(onReplicaHandler);
         cut.init();
-        verify(webSocket).write(any(Buffer.class), any(Handler.class));
+        verify(webSocket).writeBinaryMessage(any(Buffer.class), any(Handler.class));
     }
 
     @Test
@@ -134,7 +134,7 @@ class ClientChannelTest {
         listenCaptor.getValue().handle(Buffer.buffer("command: " + Json.encode(helloCommand)));
 
         verify(webSocket)
-            .write(
+            .writeBinaryMessage(
                 argThat(
                     buffer ->
                         buffer.toString().matches("reply: \\{\"commandId\":\".*\",\"type\":\"IGNORED_REPLY\",\"commandStatus\":\"ERROR\"}")
@@ -152,7 +152,7 @@ class ClientChannelTest {
         listenCaptor.getValue().handle(Buffer.buffer("command: " + Json.encode(organizationCommand)));
 
         // Reply should be sent.
-        verify(webSocket).write(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
+        verify(webSocket).writeBinaryMessage(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
     }
 
     @Test
@@ -164,7 +164,7 @@ class ClientChannelTest {
         listenCaptor.getValue().handle(Buffer.buffer("command: " + Json.encode(organizationCommand)));
 
         // Reply should be sent.
-        verify(webSocket).write(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
+        verify(webSocket).writeBinaryMessage(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
         verifyNoMoreInteractions(webSocket);
     }
 
@@ -177,7 +177,7 @@ class ClientChannelTest {
         listenCaptor.getValue().handle(Buffer.buffer("command: " + Json.encode(organizationCommand)));
 
         // Reply should be sent.
-        verify(webSocket).write(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
+        verify(webSocket).writeBinaryMessage(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
         verify(webSocket).close();
     }
 
@@ -189,7 +189,7 @@ class ClientChannelTest {
         listenCaptor.getValue().handle(Buffer.buffer("command: " + Json.encode(command)));
 
         // Reply should be sent.
-        verify(webSocket).write(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
+        verify(webSocket).writeBinaryMessage(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
         verifyNoMoreInteractions(webSocket);
 
         // Close handle should be call
@@ -211,7 +211,7 @@ class ClientChannelTest {
         listenCaptor.getValue().handle(Buffer.buffer("command: " + Json.encode(organizationCommand)));
 
         // Reply should be sent.
-        verify(webSocket).write(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
+        verify(webSocket).writeBinaryMessage(argThat(buffer -> buffer.toString().startsWith("reply: ")), any(Handler.class));
 
         verify(helloCommandCommandProducer, times(1)).prepare(any(HelloCommand.class));
     }
