@@ -147,7 +147,7 @@ public class ClientChannel {
     }
 
     void listen() {
-        webSocket.handler(
+        webSocket.binaryMessageHandler(
             buffer -> {
                 String incoming = buffer.toString();
 
@@ -237,7 +237,7 @@ public class ClientChannel {
     }
 
     void reply(Reply reply) throws JsonProcessingException {
-        this.webSocket.write(
+        this.webSocket.writeBinaryMessage(
                 Buffer.buffer(REPLY_PREFIX + toJsonString(reply)),
                 avoid -> {
                     if (avoid.failed()) {
@@ -253,7 +253,7 @@ public class ClientChannel {
     private Completable write(Command<? extends Payload> command) {
         return Completable.create(
             emitter ->
-                this.webSocket.write(
+                this.webSocket.writeBinaryMessage(
                         Buffer.buffer(COMMAND_PREFIX + toJsonString(command)),
                         avoid -> {
                             if (avoid.failed()) {
