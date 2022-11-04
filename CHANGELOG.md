@@ -1,3 +1,10 @@
+## [2.5.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.3...2.5.4) (2022-11-04)
+
+
+### Bug Fixes
+
+* handle huge payload from cockpit controller ([f27f558](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/f27f558b9cdc87e1b3145c61dd28571a98a2a3a7))
+
 ## [2.5.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.2...2.5.3) (2022-10-26)
 
 
