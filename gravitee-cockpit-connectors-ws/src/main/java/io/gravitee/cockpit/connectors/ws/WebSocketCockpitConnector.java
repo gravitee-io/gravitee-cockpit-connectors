@@ -33,6 +33,7 @@ import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.node.api.Node;
 import io.gravitee.plugin.core.api.PluginManifest;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.circuitbreaker.CircuitBreaker;
 import io.vertx.circuitbreaker.CircuitBreakerOptions;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,6 +96,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     private boolean isPrimary = false;
 
     private boolean closedByCockpit = false;
+    private boolean shuttingDown = false;
 
     private long pongHandlerId;
 
@@ -121,9 +124,14 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     }
 
     @Override
-    protected void doStart() {
+    protected void doStart() throws Exception {
+        super.doStart();
         if (enabled) {
             log.info("Cockpit connector is enabled. Starting connector.");
+
+            // Register shutdown hook
+            Thread shutdownHook = new ContainerShutdownHook(this);
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
 
             commandHandlers.values().forEach(commandHandler -> commandHandler.setCallback(this::handleOnReadyNotification));
 
@@ -140,6 +148,25 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
             connect();
         } else {
             log.info("Cockpit connector is disabled.");
+        }
+    }
+
+    @Override
+    protected void doStop() throws Exception {
+        this.shuttingDown = true;
+        super.doStop();
+
+        if (pongHandlerId != 0L) {
+            vertx.cancelTimer(pongHandlerId);
+        }
+
+        if (clientChannel != null) {
+            clientChannel
+                .close()
+                .andThen(
+                    Completable.create(emitter -> httpClient.close().onFailure(emitter::onError).onSuccess(result -> emitter.onComplete()))
+                )
+                .blockingAwait();
         }
     }
 
@@ -239,7 +266,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
                                 notifyOnDisconnectListeners();
 
-                                if (!closedByCockpit) {
+                                if (!closedByCockpit && !shuttingDown) {
                                     // How to force to reconnect ?
                                     connect();
                                 }
@@ -329,21 +356,6 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
         return clientChannel.send(command);
     }
 
-    @Override
-    protected void doStop() throws Exception {
-        if (httpClient != null) {
-            try {
-                httpClient.close();
-            } catch (IllegalStateException ise) {
-                log.warn(ise.getMessage());
-            }
-        }
-
-        if (pongHandlerId != 0L) {
-            vertx.cancelTimer(pongHandlerId);
-        }
-    }
-
     private void handleOnReadyNotification(Command<?> command, Reply reply) {
         String installationStatus = null;
 
@@ -355,6 +367,25 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
         if (COCKPIT_ACCEPTED_STATUS.equals(installationStatus)) {
             notifyOnReadyListeners();
+        }
+    }
+
+    private class ContainerShutdownHook extends Thread {
+
+        private final CockpitConnector connector;
+
+        private ContainerShutdownHook(CockpitConnector connector) {
+            super("graviteeio-cockpit-connector-finalizer");
+            this.connector = connector;
+        }
+
+        @Override
+        public void run() {
+            try {
+                connector.stop();
+            } catch (Exception ex) {
+                LoggerFactory.getLogger(this.getClass()).error("Unexpected error while stopping {}", name(), ex);
+            }
         }
     }
 }

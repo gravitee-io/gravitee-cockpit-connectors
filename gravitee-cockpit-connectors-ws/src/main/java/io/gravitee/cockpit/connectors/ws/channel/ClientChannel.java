@@ -82,6 +82,10 @@ public class ClientChannel {
         return handleHello(node);
     }
 
+    public Completable close() {
+        return Completable.create(emitter -> webSocket.close().onSuccess(result -> emitter.onComplete()).onFailure(emitter::onError));
+    }
+
     public void cleanup() {
         resultEmitters.forEach((type, emitter) -> emitter.onError(new ChannelClosedException()));
         resultEmitters.clear();
