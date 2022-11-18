@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.6...2.6.0) (2022-11-18)
+
+
+### Features
+
+* handle a graceful shutdown ([6ebd429](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/6ebd429f5eb06d87a717f4ce72072265dcaa963d))
+
 ## [2.5.6](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.5...2.5.6) (2022-11-07)
 
 
