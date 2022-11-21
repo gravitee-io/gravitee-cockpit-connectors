@@ -1,3 +1,10 @@
+# [3.0.0-alpha.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.0-alpha.3...3.0.0-alpha.4) (2022-11-21)
+
+
+### Features
+
+* handle a graceful shutdown ([64a3d54](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/64a3d5422a964c393f68a52e7e3f4d2585e1c16c))
+
 # [3.0.0-alpha.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.0-alpha.2...3.0.0-alpha.3) (2022-11-21)
 
 
