@@ -29,8 +29,8 @@ import io.gravitee.cockpit.api.command.organization.OrganizationPayload;
 import io.gravitee.cockpit.connectors.ws.exceptions.ChannelClosedException;
 import io.gravitee.node.api.Node;
 import io.gravitee.plugin.core.api.PluginManifest;
-import io.reactivex.Single;
-import io.reactivex.observers.TestObserver;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.observers.TestObserver;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
@@ -226,7 +226,6 @@ class ClientChannelTest {
         cut.cleanup();
 
         // Pending command should result in an error.
-        obs.awaitTerminalEvent();
         obs.assertError(ChannelClosedException.class);
     }
 

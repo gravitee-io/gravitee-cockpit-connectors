@@ -40,6 +40,46 @@
 
 * **deps:** update dependency io.gravitee.cockpit:gravitee-cockpit-api to v1.13.6 ([b248492](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/b248492323b1fd80f9aa419d6b5293472f36b175))
 
+# [3.0.0-alpha.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.0-alpha.3...3.0.0-alpha.4) (2022-11-21)
+
+
+### Features
+
+* handle a graceful shutdown ([64a3d54](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/64a3d5422a964c393f68a52e7e3f4d2585e1c16c))
+
+# [3.0.0-alpha.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.0-alpha.2...3.0.0-alpha.3) (2022-11-21)
+
+
+### Bug Fixes
+
+* handle huge payload from cockpit controller ([75b5601](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/75b5601c55d6ad94c5d6912c770f9d8494cefc58))
+
+# [3.0.0-alpha.2](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.0-alpha.1...3.0.0-alpha.2) (2022-10-20)
+
+
+### chore
+
+* bump to rxJava3 ([d241cd4](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/d241cd4fe78c74adf4def3f4261809eed3926f22))
+
+
+### BREAKING CHANGES
+
+* rxJava3 required
+
+# [3.0.0-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.1...3.0.0-alpha.1) (2022-10-20)
+
+
+### Code Refactoring
+
+* move to RxJava3 ([05fee67](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/05fee671ab2573448ee92cfe191ae749d7c6575e))
+
+
+### BREAKING CHANGES
+
+* rxJava3 required
+
+https://graviteedevops.atlassian.net/browse/COC-49
+
 ## [2.5.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.0...2.5.1) (2022-10-13)
 
 
