@@ -40,10 +40,10 @@
 
     <properties>
         <gravitee-bom.version>2.8</gravitee-bom.version>
-        <gravitee-node.version>1.27.3</gravitee-node.version>
+        <gravitee-node.version>2.0.1</gravitee-node.version>
         <gravitee-plugin.version>1.24.2</gravitee-plugin.version>
         <gravitee-alert-api.version>1.9.1</gravitee-alert-api.version>
-        <gravitee-cockpit-api.version>1.13.7</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>2.0.0</gravitee-cockpit-api.version>
         <lombok.version>1.18.24</lombok.version>
         <mockito.version>4.9.0</mockito.version>
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
@@ -142,7 +142,7 @@
 
         <!-- Reactive dependencies -->
         <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
+            <groupId>io.reactivex.rxjava3</groupId>
             <artifactId>rxjava</artifactId>
             <scope>provided</scope>
         </dependency>
