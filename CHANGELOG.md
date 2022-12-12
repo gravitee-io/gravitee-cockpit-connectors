@@ -1,3 +1,33 @@
+# [3.0.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.6.0...3.0.0) (2022-12-12)
+
+
+### Bug Fixes
+
+* handle huge payload from cockpit controller ([75b5601](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/75b5601c55d6ad94c5d6912c770f9d8494cefc58))
+
+
+### chore
+
+* bump to rxJava3 ([d241cd4](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/d241cd4fe78c74adf4def3f4261809eed3926f22))
+
+
+### Code Refactoring
+
+* move to RxJava3 ([05fee67](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/05fee671ab2573448ee92cfe191ae749d7c6575e))
+
+
+### Features
+
+* handle a graceful shutdown ([64a3d54](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/64a3d5422a964c393f68a52e7e3f4d2585e1c16c))
+
+
+### BREAKING CHANGES
+
+* rxJava3 required
+* rxJava3 required
+
+https://graviteedevops.atlassian.net/browse/COC-49
+
 # [2.6.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.6...2.6.0) (2022-11-18)
 
 
