@@ -47,7 +47,7 @@
         <lombok.version>1.18.24</lombok.version>
         <mockito.version>4.11.0</mockito.version>
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
-        <assertj.version>3.23.1</assertj.version>
+        <assertj.version>3.24.1</assertj.version>
     </properties>
 
     <dependencyManagement>
