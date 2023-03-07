@@ -241,6 +241,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                                 pong -> {
                                     if (!webSocket.isClosed()) {
                                         webSocket.writePing(Buffer.buffer(PING_PONG_PREFIX + node.id() + " - " + node.hostname()));
+                                        webSocket.writePong(Buffer.buffer(PING_PONG_PREFIX + node.id() + " - " + node.hostname()));
                                     }
                                 }
                             );
