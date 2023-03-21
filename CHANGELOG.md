@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.3...4.0.0) (2023-03-21)
+
+
+### Bug Fixes
+
+* **deps:** move to latest dependencies and orb ([4e2cef0](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/4e2cef0b5427edf77f2bb666dd111ff7e0b02cb3))
+
+
+### BREAKING CHANGES
+
+* **deps:** update of gravitee bom 4.0.0 and gravitee node 3.0.1
+
 ## [3.0.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.2...3.0.3) (2023-02-24)
 
 
