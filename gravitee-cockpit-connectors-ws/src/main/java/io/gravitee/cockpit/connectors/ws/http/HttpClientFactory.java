@@ -109,6 +109,9 @@ public class HttpClientFactory {
             }
         }
 
+        options.setMaxWebSocketFrameSize(configuration.getMaxWebSocketFrameSize());
+        options.setMaxWebSocketMessageSize(configuration.getMaxWebSocketMessageSize());
+
         return vertx.createHttpClient(options);
     }
 }
