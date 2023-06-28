@@ -81,6 +81,39 @@ public class HttpClientConfiguration {
     @Value("${cockpit.truststore.password:#{null}}")
     private String truststorePassword;
 
+    /**
+     * Max size of a WebSocket frame.
+     * Be careful when changing this value, it needs to be a good trade-off between:
+     * <ul>
+     *     <li>memory consumption (the bigger the value, the more memory is used)</li>
+     *     <li>performance (the smaller the value, the more CPU is used)</li>
+     *     <li>network usage (the smaller the value, the more network calls are made)</li>
+     * </ul>
+     * It also need to be aligned with the values set on the Cockpit side.
+     * <p>
+     *
+     * Default value is the same as the one in Vert.x, 65536 bytes (64KB).
+     *
+     * @see io.vertx.core.http.HttpClientOptions#maxWebSocketFrameSize
+     */
+    @Value("${cockpit.ws.maxWebSocketFrameSize:65536}")
+    private int maxWebSocketFrameSize;
+
+    /**
+     * A WebSocket messages can be composed of several WebSocket frames.
+     * This value is the maximum size of a WebSocket message.
+     * <p>
+     * It should be a multiple of {@link #maxWebSocketFrameSize}.
+     * <p>
+     * Default value is 200 x {@link #maxWebSocketFrameSize} = 13MB.
+     * It can sound big but when doing API Promotion with APIM, the payload can be huge as it includes the doc pages, images etc.
+     * It also need to be aligned with the values set on the Cockpit side.
+     *
+     * @see io.vertx.core.http.HttpClientOptions#maxWebSocketMessageSize
+     */
+    @Value("${cockpit.ws.maxWebSocketMessageSize:13107200}")
+    private int maxWebSocketMessageSize;
+
     public List<WebSocketEndpoint> getEndpoints() {
         if (endpoints == null) {
             endpoints = initializeEndpoints();
