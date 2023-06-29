@@ -1,3 +1,10 @@
+## [4.0.2-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.1...4.0.2-alpha.1) (2023-06-29)
+
+
+### Bug Fixes
+
+* bump gravitee node version ([f62bd25](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/f62bd25ab0e5f25975fd6958579bc647d9038d26))
+
 ## [4.0.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.0...4.0.1) (2023-06-29)
 
 
