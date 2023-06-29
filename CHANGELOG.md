@@ -1,3 +1,10 @@
+## [2.6.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.6.0...2.6.1) (2023-06-29)
+
+
+### Bug Fixes
+
+* add configuration for WS max frame and message sizes ([8e8ffb1](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/8e8ffb1ac7fdd7b566e225364dbe5d2cf045a390))
+
 # [2.6.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/2.5.6...2.6.0) (2022-11-18)
 
 
