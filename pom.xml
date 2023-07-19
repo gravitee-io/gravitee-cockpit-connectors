@@ -29,7 +29,7 @@
 
     <groupId>io.gravitee.cockpit</groupId>
     <artifactId>gravitee-cockpit-connectors</artifactId>
-    <version>4.0.2-alpha.1</version>
+    <version>4.0.1</version>
     <packaging>pom</packaging>
     <name>Gravitee.io - Cockpit - Connectors</name>
 
@@ -40,10 +40,10 @@
 
     <properties>
         <gravitee-bom.version>5.0.0</gravitee-bom.version>
-        <gravitee-node.version>3.1.0-alpha.11</gravitee-node.version>
-        <gravitee-plugin.version>2.0.0-alpha.1</gravitee-plugin.version>
+        <gravitee-node.version>4.0.0</gravitee-node.version>
+        <gravitee-plugin.version>2.0.1</gravitee-plugin.version>
         <gravitee-alert-api.version>2.0.0</gravitee-alert-api.version>
-        <gravitee-cockpit-api.version>2.0.0</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>2.1.0</gravitee-cockpit-api.version>
     </properties>
 
     <dependencyManagement>
