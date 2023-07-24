@@ -1,9 +1,23 @@
+## [4.0.2-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.1...4.0.2-alpha.1) (2023-06-29)
+
+
+### Bug Fixes
+
+* bump gravitee node version ([f62bd25](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/f62bd25ab0e5f25975fd6958579bc647d9038d26))
+
 ## [4.0.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.0...4.0.1) (2023-06-29)
 
 
 ### Bug Fixes
 
 * add configuration for WS max frame and message sizes ([1929b60](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/1929b60670d4badf8f3b8848b1527855e2509318))
+
+## [4.0.1-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.0...4.0.1-alpha.1) (2023-06-21)
+
+
+### Bug Fixes
+
+* bump gravitee node version ([f62bd25](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/f62bd25ab0e5f25975fd6958579bc647d9038d26))
 
 # [4.0.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/3.0.3...4.0.0) (2023-03-21)
 
