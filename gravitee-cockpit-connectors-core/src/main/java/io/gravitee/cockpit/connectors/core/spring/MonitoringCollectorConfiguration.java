@@ -34,7 +34,7 @@ public class MonitoringCollectorConfiguration {
     MonitoringCollectorService monitoringCollectorService(
         NodeMonitoringService nodeMonitoringService,
         CockpitConnector cockpitConnector,
-        ObjectMapper objectMapper
+        @Qualifier("cockpitObjectMapper") ObjectMapper objectMapper
     ) {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.setThreadNamePrefix("cockpit-monitoring-collector-");
