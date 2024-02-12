@@ -1,3 +1,10 @@
+## [4.0.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.2...4.0.3) (2024-02-12)
+
+
+### Bug Fixes
+
+* Enforce the cockpitObjectMapper qualifier for Spring 6.1.x+ ([a041bc9](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/a041bc9e2eb74ba5cfabb3605ad7aa720c551a32))
+
 ## [4.0.2](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.1...4.0.2) (2023-07-24)
 
 
