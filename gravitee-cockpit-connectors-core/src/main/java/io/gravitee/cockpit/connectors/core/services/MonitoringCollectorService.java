@@ -17,13 +17,11 @@ package io.gravitee.cockpit.connectors.core.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.gravitee.cockpit.api.CockpitConnector;
-import io.gravitee.cockpit.api.command.healthcheck.HealthCheckCommand;
-import io.gravitee.cockpit.api.command.healthcheck.HealthCheckPayload;
-import io.gravitee.cockpit.api.command.healthcheck.HealthCheckProbe;
-import io.gravitee.cockpit.api.command.node.NodeCommand;
-import io.gravitee.cockpit.api.command.node.NodePayload;
-import io.gravitee.cockpit.api.command.node.NodePlugin;
+import io.gravitee.cockpit.api.command.v1.node.NodeCommand;
+import io.gravitee.cockpit.api.command.v1.node.NodeCommandPayload;
+import io.gravitee.cockpit.api.command.v1.node.healthcheck.NodeHealthCheckCommand;
+import io.gravitee.cockpit.api.command.v1.node.healthcheck.NodeHealthCheckCommandPayload;
+import io.gravitee.exchange.api.connector.ExchangeConnector;
 import io.gravitee.node.api.Monitoring;
 import io.gravitee.node.api.healthcheck.HealthCheck;
 import io.gravitee.node.api.infos.NodeInfos;
@@ -32,6 +30,7 @@ import io.gravitee.node.monitoring.NodeMonitoringService;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,31 +42,19 @@ import org.springframework.scheduling.support.CronTrigger;
  * @author GraviteeSource Team
  */
 @Slf4j
+@RequiredArgsConstructor
 public class MonitoringCollectorService implements InitializingBean {
 
     @Value("${cockpit.monitoring.cron:*/5 * * * * *}")
     private String cronTrigger;
 
     private final NodeMonitoringService nodeMonitoringService;
-    private final CockpitConnector cockpitConnector;
+    private final ExchangeConnector exchangeConnector;
     private final TaskScheduler taskScheduler;
     private final ObjectMapper objectMapper;
 
     private long lastRefreshAt;
     private long lastDelay;
-    boolean ready;
-
-    public MonitoringCollectorService(
-        NodeMonitoringService nodeMonitoringService,
-        CockpitConnector cockpitConnector,
-        TaskScheduler taskScheduler,
-        ObjectMapper objectMapper
-    ) {
-        this.nodeMonitoringService = nodeMonitoringService;
-        this.cockpitConnector = cockpitConnector;
-        this.taskScheduler = taskScheduler;
-        this.objectMapper = objectMapper;
-    }
 
     @Override
     public void afterPropertiesSet() {
@@ -76,19 +63,16 @@ public class MonitoringCollectorService implements InitializingBean {
         lastRefreshAt = System.currentTimeMillis() - ChronoUnit.HOURS.getDuration().toMillis();
         lastDelay = 0;
 
-        cockpitConnector.registerOnReadyListener(() -> this.ready = true);
-        cockpitConnector.registerOnDisconnectListener(() -> this.ready = false);
-
         taskScheduler.schedule(this::collectAndSend, new CronTrigger(cronTrigger));
     }
 
     protected void collectAndSend() {
-        if (!ready) {
+        if (!exchangeConnector.isActive()) {
             log.debug("Cockpit connector is not ready to accept command or installation is not accepted yet. Skip monitoring propagation.");
             return;
         }
 
-        if (!cockpitConnector.isPrimary()) {
+        if (!exchangeConnector.isPrimary()) {
             log.debug("Cockpit connector is not primary. Skip monitoring propagation.");
             return;
         }
@@ -102,14 +86,14 @@ public class MonitoringCollectorService implements InitializingBean {
         nodeMonitoringService
             .findByTypeAndTimeframe(Monitoring.NODE_INFOS, from, nextLastRefreshAt)
             .map(this::convertToNodeCommand)
-            .flatMapSingle(cockpitConnector::sendCommand)
+            .flatMapSingle(exchangeConnector::sendCommand)
             .blockingSubscribe();
 
         // Then send health checks.
         nodeMonitoringService
             .findByTypeAndTimeframe(Monitoring.HEALTH_CHECK, from, nextLastRefreshAt)
             .map(this::convertToHealthCheckCommand)
-            .flatMapSingle(cockpitConnector::sendCommand)
+            .flatMapSingle(exchangeConnector::sendCommand)
             .blockingSubscribe();
 
         lastRefreshAt = nextLastRefreshAt;
@@ -118,62 +102,55 @@ public class MonitoringCollectorService implements InitializingBean {
     }
 
     private NodeCommand convertToNodeCommand(Monitoring monitoring) throws JsonProcessingException {
-        final NodeCommand nodeCommand = new NodeCommand();
-        final NodePayload nodePayload = new NodePayload();
-
         NodeInfos nodeInfos = objectMapper.readValue(monitoring.getPayload(), NodeInfos.class);
-        nodePayload.setNodeId(nodeInfos.getId());
-        nodePayload.setName(nodeInfos.getName());
-        nodePayload.setApplication(nodeInfos.getApplication());
-        nodePayload.setEvaluatedAt(nodeInfos.getEvaluatedAt());
-        nodePayload.setStatus(NodePayload.Status.valueOf(nodeInfos.getStatus().name()));
-        nodePayload.setVersion(nodeInfos.getVersion());
-        nodePayload.setShardingTags(
-            nodeInfos.getTags() == null
-                ? List.of()
-                : nodeInfos.getTags().stream().filter(tag -> !tag.isBlank()).collect(Collectors.toList())
+        return new NodeCommand(
+            NodeCommandPayload
+                .builder()
+                .nodeId(nodeInfos.getId())
+                .installationId(exchangeConnector.targetId())
+                .name(nodeInfos.getName())
+                .application(nodeInfos.getApplication())
+                .evaluatedAt(nodeInfos.getEvaluatedAt())
+                .status(NodeCommandPayload.Status.valueOf(nodeInfos.getStatus().name()))
+                .version(nodeInfos.getVersion())
+                .shardingTags(nodeInfos.getTags() == null ? List.of() : nodeInfos.getTags().stream().filter(tag -> !tag.isBlank()).toList())
+                .tenant(nodeInfos.getTenant())
+                .jdkVersion(nodeInfos.getJdkVersion())
+                .plugins(nodeInfos.getPluginInfos().stream().map(this::convertToNodePlugin).toList())
+                .build()
         );
-        nodePayload.setTenant(nodeInfos.getTenant());
-        nodePayload.setJdkVersion(nodeInfos.getJdkVersion());
-        nodePayload.setPlugins(nodeInfos.getPluginInfos().stream().map(this::convertToNodePlugin).collect(Collectors.toList()));
-
-        nodeCommand.setPayload(nodePayload);
-        return nodeCommand;
     }
 
-    private NodePlugin convertToNodePlugin(PluginInfos pluginInfos) {
-        final NodePlugin nodePlugin = new NodePlugin();
-        nodePlugin.setName(pluginInfos.getName());
-        nodePlugin.setVersion(pluginInfos.getVersion());
-
-        return nodePlugin;
+    private NodeCommandPayload.NodePlugin convertToNodePlugin(PluginInfos pluginInfos) {
+        return NodeCommandPayload.NodePlugin.builder().name(pluginInfos.getName()).version(pluginInfos.getVersion()).build();
     }
 
-    private HealthCheckCommand convertToHealthCheckCommand(Monitoring monitoring) throws JsonProcessingException {
-        final HealthCheckCommand healthCheckCommand = new HealthCheckCommand();
-        final HealthCheckPayload healthcheckPayload = new HealthCheckPayload();
+    private NodeHealthCheckCommand convertToHealthCheckCommand(Monitoring monitoring) throws JsonProcessingException {
         final HealthCheck healthCheck = objectMapper.readValue(monitoring.getPayload(), HealthCheck.class);
-        final List<HealthCheckProbe> probes = healthCheck
-            .getResults()
-            .entrySet()
-            .stream()
-            .map(this::convertToHealthCheckProbe)
-            .collect(Collectors.toList());
-
-        healthcheckPayload.setNodeId(monitoring.getNodeId());
-        healthcheckPayload.setEvaluatedAt(healthCheck.getEvaluatedAt());
-        healthcheckPayload.setProbes(probes);
-        healthcheckPayload.setHealthy(healthCheck.isHealthy());
-        healthCheckCommand.setPayload(healthcheckPayload);
-
-        return healthCheckCommand;
+        return new NodeHealthCheckCommand(
+            NodeHealthCheckCommandPayload
+                .builder()
+                .nodeId(monitoring.getNodeId())
+                .installationId(exchangeConnector.targetId())
+                .evaluatedAt(healthCheck.getEvaluatedAt())
+                .isHealthy(healthCheck.isHealthy())
+                .probes(healthCheck.getResults().entrySet().stream().map(this::convertToHealthCheckProbe).toList())
+                .build()
+        );
     }
 
-    private HealthCheckProbe convertToHealthCheckProbe(java.util.Map.Entry<String, io.gravitee.node.api.healthcheck.Result> e) {
-        HealthCheckProbe probe = new HealthCheckProbe();
-        probe.setKey(e.getKey());
-        probe.setStatus(e.getValue().isHealthy() ? HealthCheckProbe.Status.HEALTHY : HealthCheckProbe.Status.UNHEALTHY);
-        probe.setStatusMessage(e.getValue().getMessage());
-        return probe;
+    private NodeHealthCheckCommandPayload.HealthCheckProbe convertToHealthCheckProbe(
+        java.util.Map.Entry<String, io.gravitee.node.api.healthcheck.Result> e
+    ) {
+        return NodeHealthCheckCommandPayload.HealthCheckProbe
+            .builder()
+            .key(e.getKey())
+            .status(
+                e.getValue().isHealthy()
+                    ? NodeHealthCheckCommandPayload.HealthCheckProbe.Status.HEALTHY
+                    : NodeHealthCheckCommandPayload.HealthCheckProbe.Status.UNHEALTHY
+            )
+            .statusMessage(e.getValue().getMessage())
+            .build();
     }
 }

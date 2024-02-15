@@ -29,7 +29,7 @@
 
     <groupId>io.gravitee.cockpit</groupId>
     <artifactId>gravitee-cockpit-connectors</artifactId>
-    <version>4.0.8</version>
+    <version>5.0.0-replace-adhoc-command-by-exchange-framework-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Gravitee.io - Cockpit - Connectors</name>
 
@@ -43,7 +43,8 @@
         <gravitee-node.version>5.10.0</gravitee-node.version>
         <gravitee-plugin.version>3.1.0</gravitee-plugin.version>
         <gravitee-alert-api.version>2.0.0</gravitee-alert-api.version>
-        <gravitee-cockpit-api.version>2.6.6</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>3.0.0</gravitee-cockpit-api.version>
+        <gravitee-exchange.version>1.0.1</gravitee-exchange.version>
 
         <jdk.version>17</jdk.version>
     </properties>
@@ -71,6 +72,7 @@
                 <groupId>io.gravitee.cockpit</groupId>
                 <artifactId>gravitee-cockpit-api</artifactId>
                 <version>${gravitee-cockpit-api.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.gravitee.alert</groupId>
@@ -90,6 +92,21 @@
                 <version>${gravitee-node.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.exchange</groupId>
+                <artifactId>gravitee-exchange-api</artifactId>
+                <version>${gravitee-exchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.exchange</groupId>
+                <artifactId>gravitee-exchange-connector-core</artifactId>
+                <version>${gravitee-exchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.exchange</groupId>
+                <artifactId>gravitee-exchange-connector-websocket</artifactId>
+                <version>${gravitee-exchange.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -169,8 +186,9 @@
                 <artifactId>prettier-maven-plugin</artifactId>
                 <version>0.22</version>
                 <configuration>
-                    <nodeVersion>12.13.0</nodeVersion>
-                    <prettierJavaVersion>1.0.1</prettierJavaVersion>
+                    <nodeVersion>16.16.0</nodeVersion>
+                    <prettierJavaVersion>1.6.1</prettierJavaVersion>
+                    <skip>${skip.validation}</skip>
                 </configuration>
                 <executions>
                     <execution>

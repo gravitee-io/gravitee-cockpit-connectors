@@ -16,12 +16,11 @@
 package io.gravitee.cockpit.connectors.core.spring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.gravitee.cockpit.api.CockpitConnector;
 import io.gravitee.cockpit.connectors.core.services.MonitoringCollectorService;
+import io.gravitee.exchange.api.connector.ExchangeConnector;
 import io.gravitee.node.monitoring.NodeMonitoringService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
@@ -33,7 +32,7 @@ public class MonitoringCollectorConfiguration {
     @Bean
     MonitoringCollectorService monitoringCollectorService(
         NodeMonitoringService nodeMonitoringService,
-        CockpitConnector cockpitConnector,
+        @Qualifier("cockpitConnector") ExchangeConnector cockpitConnector,
         @Qualifier("cockpitObjectMapper") ObjectMapper objectMapper
     ) {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();

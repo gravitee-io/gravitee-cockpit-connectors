@@ -24,7 +24,7 @@
     <parent>
         <artifactId>gravitee-cockpit-connectors</artifactId>
         <groupId>io.gravitee.cockpit</groupId>
-        <version>4.0.8</version>
+        <version>5.0.0-replace-adhoc-command-by-exchange-framework-SNAPSHOT</version>
     </parent>
 
     <artifactId>gravitee-cockpit-connectors-ws</artifactId>
@@ -39,36 +39,35 @@
         <!-- Gravitee dependencies -->
         <dependency>
             <groupId>io.gravitee.cockpit</groupId>
+            <artifactId>gravitee-cockpit-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.cockpit</groupId>
             <artifactId>gravitee-cockpit-connectors-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.gravitee.node</groupId>
-            <artifactId>gravitee-node-vertx</artifactId>
-            <scope>provided</scope>
+            <groupId>io.gravitee.exchange</groupId>
+            <artifactId>gravitee-exchange-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.exchange</groupId>
+            <artifactId>gravitee-exchange-connector-websocket</artifactId>
         </dependency>
         <dependency>
             <groupId>io.gravitee.plugin</groupId>
             <artifactId>gravitee-plugin-core</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Vert.x -->
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
+            <groupId>io.reactivex.rxjava3</groupId>
+            <artifactId>rxjava</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-circuit-breaker</artifactId>
-            <exclusions>
-                <!-- vertx-core must be explicitly excluded to avoid bad inclusion by assembly -->
-                <exclusion>
-                    <groupId>io.vertx</groupId>
-                    <artifactId>vertx-core</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>vertx-rx-java3</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Spring dependencies -->
@@ -82,11 +81,14 @@
             <artifactId>spring-context</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- jackson-databind must be explicitly imported since Vertx 4 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
