@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.cockpit.connectors.ws.exceptions;
+package io.gravitee.cockpit.connectors.ws.command;
+
+import io.gravitee.exchange.api.connector.ConnectorCommandContext;
 
 /**
- * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
+ * @author Guillaume LAMIRAND (guillaume.lamirand at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class ChannelClosedException extends Throwable {}
+public record CockpitConnectorCommandContext() implements ConnectorCommandContext {}

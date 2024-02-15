@@ -15,137 +15,101 @@
  */
 package io.gravitee.cockpit.connectors.ws;
 
-import static io.gravitee.cockpit.api.command.Command.PING_PONG_PREFIX;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.api.CockpitConnector;
-import io.gravitee.cockpit.api.command.Command;
-import io.gravitee.cockpit.api.command.CommandProducer;
-import io.gravitee.cockpit.api.command.Payload;
-import io.gravitee.cockpit.api.command.Reply;
-import io.gravitee.cockpit.api.command.hello.HelloReply;
-import io.gravitee.cockpit.api.command.installation.InstallationPayload;
-import io.gravitee.cockpit.api.command.installation.InstallationReply;
-import io.gravitee.cockpit.connectors.core.internal.CommandHandlerWrapper;
-import io.gravitee.cockpit.connectors.ws.channel.ClientChannel;
-import io.gravitee.cockpit.connectors.ws.endpoints.WebSocketEndpoint;
-import io.gravitee.cockpit.connectors.ws.http.HttpClientFactory;
+import io.gravitee.cockpit.connectors.ws.command.CockpitConnectorCommandContext;
 import io.gravitee.common.service.AbstractService;
-import io.gravitee.node.api.Node;
-import io.gravitee.plugin.core.api.PluginManifest;
-import io.reactivex.rxjava3.core.Completable;
+import io.gravitee.exchange.api.command.Command;
+import io.gravitee.exchange.api.command.CommandAdapter;
+import io.gravitee.exchange.api.command.CommandHandler;
+import io.gravitee.exchange.api.command.Reply;
+import io.gravitee.exchange.api.command.ReplyAdapter;
+import io.gravitee.exchange.api.connector.ConnectorCommandHandlersFactory;
+import io.gravitee.exchange.api.connector.ExchangeConnector;
+import io.gravitee.exchange.api.connector.ExchangeConnectorManager;
+import io.gravitee.exchange.api.websocket.command.ExchangeSerDe;
+import io.gravitee.exchange.api.websocket.protocol.ProtocolVersion;
+import io.gravitee.exchange.connector.websocket.WebSocketExchangeConnector;
+import io.gravitee.exchange.connector.websocket.client.WebSocketConnectorClientFactory;
 import io.reactivex.rxjava3.core.Single;
-import io.vertx.circuitbreaker.CircuitBreaker;
-import io.vertx.circuitbreaker.CircuitBreakerOptions;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.WebSocket;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import lombok.Getter;
+import io.vertx.rxjava3.core.Vertx;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
 @Slf4j
+@RequiredArgsConstructor
 public class WebSocketCockpitConnector extends AbstractService<CockpitConnector> implements CockpitConnector {
 
-    private static final long PING_HANDLER_DELAY = 5000;
-    private static final String COCKPIT_ACCEPTED_STATUS = "ACCEPTED";
-
-    @Value("${cockpit.enabled:false}")
-    private boolean enabled;
-
-    @Value("${cockpit.ws.discovery:true}")
-    private boolean discovery;
-
-    @Autowired
-    private HttpClientFactory httpClientFactory;
+    public static final ProtocolVersion PROTOCOL_VERSION = ProtocolVersion.V1;
 
     @Autowired
     private Vertx vertx;
 
     @Autowired
-    private Node node;
+    private final ExchangeConnectorManager exchangeConnectorManager;
 
     @Autowired
-    @Qualifier("cockpitCommandHandlers")
-    private Map<Command.Type, CommandHandlerWrapper<Command<?>, Reply>> commandHandlers;
-
-    @Autowired(required = false)
-    @Qualifier("cockpitHelloCommandProducer")
-    private CommandProducer helloCommandProducer;
+    @Lazy
+    @Qualifier("cockpitConnectorCommandHandlersFactory")
+    private final ConnectorCommandHandlersFactory cockpitConnectorCommandHandlersFactory;
 
     @Autowired
-    private PluginManifest pluginManifest;
+    @Qualifier("cockpitWebsocketConnectorClientFactory")
+    private final WebSocketConnectorClientFactory cockpitWebsocketConnectorClientFactory;
 
     @Autowired
-    @Qualifier("cockpitObjectMapper")
-    private ObjectMapper objectMapper;
+    @Qualifier("cockpitExchangeSerDe")
+    private final ExchangeSerDe cockpitExchangeSerDe;
 
-    @Getter
-    private boolean isPrimary = false;
+    @Value("${cockpit.enabled:false}")
+    private boolean enabled;
 
-    private boolean closedByCockpit = false;
-    private boolean shuttingDown = false;
-
-    private long pongHandlerId;
-
-    private CircuitBreaker circuitBreaker;
-
-    private final String path;
-
-    private HttpClient httpClient;
-
-    private ClientChannel clientChannel;
-
-    private final Collection<Runnable> onConnectListeners;
-    private final Collection<Runnable> onDisconnectListeners;
-    private final Collection<Runnable> onReadyListeners;
-    private final Collection<Runnable> onPrimaryListeners;
-    private final Collection<Runnable> onReplicaListeners;
-
-    public WebSocketCockpitConnector() {
-        this.path = "/ws/controller";
-        onConnectListeners = new ConcurrentLinkedQueue<>();
-        onDisconnectListeners = new ConcurrentLinkedQueue<>();
-        onReadyListeners = new ConcurrentLinkedQueue<>();
-        onPrimaryListeners = new ConcurrentLinkedQueue<>();
-        onReplicaListeners = new ConcurrentLinkedQueue<>();
-    }
+    private WebSocketExchangeConnector websocketExchangeConnector;
 
     @Override
     protected void doStart() throws Exception {
         super.doStart();
         if (enabled) {
-            log.info("Cockpit connector is enabled. Starting connector.");
+            log.info("Cockpit connector is enabled. Starting connector...");
+            CockpitConnectorCommandContext integrationConnectorCommandContext = new CockpitConnectorCommandContext();
 
-            // Register shutdown hook
-            Thread shutdownHook = new ContainerShutdownHook(this);
-            Runtime.getRuntime().addShutdownHook(shutdownHook);
-
-            commandHandlers.values().forEach(commandHandler -> commandHandler.setCallback(this::handleOnReadyNotification));
-
-            circuitBreaker =
-                CircuitBreaker.create(
-                    "cockpit-connector",
+            List<CommandHandler<? extends Command<?>, ? extends Reply<?>>> connectorCommandHandlers = cockpitConnectorCommandHandlersFactory.buildCommandHandlers(
+                integrationConnectorCommandContext
+            );
+            List<CommandAdapter<? extends Command<?>, ? extends Command<?>, ? extends Reply<?>>> connectorCommandAdapters = cockpitConnectorCommandHandlersFactory.buildCommandAdapters(
+                integrationConnectorCommandContext,
+                PROTOCOL_VERSION
+            );
+            List<ReplyAdapter<? extends Reply<?>, ? extends Reply<?>>> connectorReplyAdapters = cockpitConnectorCommandHandlersFactory.buildReplyAdapters(
+                integrationConnectorCommandContext,
+                PROTOCOL_VERSION
+            );
+            websocketExchangeConnector =
+                new WebSocketExchangeConnector(
+                    PROTOCOL_VERSION,
+                    connectorCommandHandlers,
+                    connectorCommandAdapters,
+                    connectorReplyAdapters,
                     vertx,
-                    new CircuitBreakerOptions().setMaxRetries(Integer.MAX_VALUE).setNotificationAddress(null)
+                    cockpitWebsocketConnectorClientFactory,
+                    cockpitExchangeSerDe
                 );
 
-            // Back-off retry
-            circuitBreaker.retryPolicy(integer -> 5000L);
+            exchangeConnectorManager.register(websocketExchangeConnector).blockingAwait();
+            log.info("Cockpit connector started successfully.");
 
-            connect();
+            // Register shutdown hook
+            Thread shutdownHook = new ContainerShutdownHook(websocketExchangeConnector);
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
         } else {
             log.info("Cockpit connector is disabled.");
         }
@@ -153,228 +117,27 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
     @Override
     protected void doStop() throws Exception {
-        this.shuttingDown = true;
         super.doStop();
-
-        if (pongHandlerId != 0L) {
-            vertx.cancelTimer(pongHandlerId);
-        }
-
-        if (clientChannel != null) {
-            clientChannel
-                .close()
-                .andThen(
-                    Completable.create(emitter -> httpClient.close().onFailure(emitter::onError).onSuccess(result -> emitter.onComplete()))
-                )
-                .blockingAwait();
-        }
     }
 
     @Override
-    public void registerOnConnectListener(Runnable runnable) {
-        onConnectListeners.add(runnable);
-    }
-
-    @Override
-    public void registerOnDisconnectListener(Runnable runnable) {
-        onDisconnectListeners.add(runnable);
-    }
-
-    @Override
-    public void registerOnReadyListener(Runnable runnable) {
-        onReadyListeners.add(runnable);
-    }
-
-    @Override
-    public void registerOnPrimary(Runnable runnable) {
-        onPrimaryListeners.add(runnable);
-    }
-
-    @Override
-    public void registerOnReplica(Runnable runnable) {
-        onReplicaListeners.add(runnable);
-    }
-
-    private void connect() {
-        circuitBreaker
-            .execute(this::doConnect)
-            .onComplete(
-                result -> {
-                    // The connection has been established.
-                    if (result.succeeded()) {
-                        final WebSocket webSocket = result.result();
-                        clientChannel =
-                            new ClientChannel(webSocket, node, helloCommandProducer, ((Map) commandHandlers), pluginManifest, objectMapper);
-
-                        this.notifyOnConnectListeners();
-
-                        clientChannel.onClose(
-                            () -> {
-                                closedByCockpit = true;
-                                webSocket.close();
-                            }
-                        );
-
-                        clientChannel.onPrimary(
-                            () -> {
-                                this.isPrimary = true;
-                                notifyOnPrimaryListeners();
-                            }
-                        );
-                        clientChannel.onReplica(
-                            () -> {
-                                this.isPrimary = false;
-                                notifyOnReplicaListeners();
-                            }
-                        );
-
-                        clientChannel
-                            .init()
-                            .doOnError(throwable -> log.error("An error occurred when initializing the web socket channel.", throwable))
-                            .subscribe(helloReply -> handleOnReadyNotification(null, helloReply));
-
-                        // Initialize ping-pong
-                        // See RFC 6455 Section <a href="https://tools.ietf.org/html/rfc6455#section-5.5.2"
-                        pongHandlerId =
-                            vertx.setPeriodic(
-                                PING_HANDLER_DELAY,
-                                pong -> {
-                                    if (!webSocket.isClosed()) {
-                                        webSocket.writePing(Buffer.buffer(PING_PONG_PREFIX + node.id() + " - " + node.hostname()));
-                                    }
-                                }
-                            );
-
-                        if (discovery) {
-                            log.info("Discovery mode is enabled, listening for cockpit instances...");
-                        }
-
-                        webSocket.exceptionHandler(throwable -> log.error("An error occurs on the websocket connection", throwable));
-
-                        webSocket.pongHandler(data -> log.debug("Got a pong from Cockpit Controller"));
-
-                        webSocket.closeHandler(
-                            closeEvent -> {
-                                log.debug("Connection to Cockpit Controller has been closed.");
-
-                                if (pongHandlerId != 0L) {
-                                    vertx.cancelTimer(pongHandlerId);
-                                }
-
-                                // Cleanup channel.
-                                clientChannel.cleanup();
-
-                                notifyOnDisconnectListeners();
-
-                                if (!closedByCockpit && !shuttingDown) {
-                                    // How to force to reconnect ?
-                                    connect();
-                                }
-                            }
-                        );
-                    } else {
-                        // Retry the connection
-                        connect();
-                    }
+    public Single<Reply<?>> sendCommand(final Command<?> command) {
+        return Single
+            .fromCallable(() -> this.websocketExchangeConnector.isActive())
+            .flatMap(isActive -> {
+                if (isActive) {
+                    return this.websocketExchangeConnector.sendCommand(command);
+                } else {
+                    return Single.error(new IllegalStateException("CockpitConnector is not ready yet."));
                 }
-            );
-    }
-
-    private void notifyOnConnectListeners() {
-        log.debug("Notifying all OnConnect listeners.");
-        onConnectListeners.forEach(Runnable::run);
-    }
-
-    private void notifyOnDisconnectListeners() {
-        log.debug("Notifying all OnDisconnect listeners.");
-        onDisconnectListeners.forEach(Runnable::run);
-    }
-
-    private void notifyOnReadyListeners() {
-        log.debug("Notifying all OnReady listeners.");
-        onReadyListeners.forEach(Runnable::run);
-    }
-
-    private void notifyOnPrimaryListeners() {
-        log.debug("Notifying all OnPrimary listeners.");
-        onPrimaryListeners.forEach(Runnable::run);
-    }
-
-    private void notifyOnReplicaListeners() {
-        log.debug("Notifying all OnReplica listeners.");
-        onReplicaListeners.forEach(Runnable::run);
-    }
-
-    private void doConnect(Promise<WebSocket> promise) {
-        try {
-            WebSocketEndpoint webSocketEndpoint = httpClientFactory.nextEndpoint();
-
-            if (webSocketEndpoint == null) {
-                log.warn("No Cockpit endpoint is defined. Please check that 'cockpit.ws.endpoints' property has been properly defined.");
-                promise.fail("No Cockpit endpoint is defined.");
-                return;
-            }
-
-            log.debug("Trying to connect to Cockpit Controller WebSocket (endpoint [{}])." + webSocketEndpoint.getUrl());
-
-            httpClient = httpClientFactory.getHttpClient(webSocketEndpoint);
-
-            httpClient.webSocket(
-                webSocketEndpoint.getPort(),
-                webSocketEndpoint.getHost(),
-                webSocketEndpoint.resolvePath(path),
-                result -> {
-                    if (result.succeeded()) {
-                        // Re-init endpoint counter.
-                        webSocketEndpoint.reinitRetryCount();
-
-                        log.info("Channel is now connected to Cockpit Controller through websocket from {}", webSocketEndpoint + path);
-                        promise.complete(result.result());
-                    } else {
-                        Throwable throwable = result.cause();
-                        log.error(
-                            "An error occurs while trying to connect to the Cockpit Controller: {} [{} times]",
-                            throwable.getMessage(),
-                            webSocketEndpoint.getRetryCount(),
-                            throwable
-                        );
-                        promise.fail(throwable);
-
-                        // Force the HTTP client to close after a defect.
-                        httpClient.close();
-                    }
-                }
-            );
-        } catch (Exception e) {
-            log.error("An error occurred when trying to connect to Cockpit Controller.", e);
-            promise.fail(e);
-        }
-    }
-
-    @Override
-    public Single<Reply> sendCommand(Command<? extends Payload> command) {
-        return clientChannel.send(command);
-    }
-
-    private void handleOnReadyNotification(Command<?> command, Reply reply) {
-        String installationStatus = null;
-
-        if (reply instanceof HelloReply) {
-            installationStatus = ((HelloReply) reply).getInstallationStatus();
-        } else if (reply instanceof InstallationReply) {
-            installationStatus = ((InstallationPayload) command.getPayload()).getStatus();
-        }
-
-        if (COCKPIT_ACCEPTED_STATUS.equals(installationStatus)) {
-            notifyOnReadyListeners();
-        }
+            });
     }
 
     private class ContainerShutdownHook extends Thread {
 
-        private final CockpitConnector connector;
+        private final ExchangeConnector connector;
 
-        private ContainerShutdownHook(CockpitConnector connector) {
+        private ContainerShutdownHook(ExchangeConnector connector) {
             super("graviteeio-cockpit-connector-finalizer");
             this.connector = connector;
         }
@@ -382,7 +145,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
         @Override
         public void run() {
             try {
-                connector.stop();
+                connector.close().blockingAwait();
             } catch (Exception ex) {
                 LoggerFactory.getLogger(this.getClass()).error("Unexpected error while stopping {}", name(), ex);
             }

@@ -21,10 +21,11 @@ import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.gravitee.cockpit.api.CockpitConnector;
-import io.gravitee.cockpit.api.command.Command;
-import io.gravitee.cockpit.api.command.ignored.IgnoredReply;
-import io.gravitee.cockpit.api.command.node.NodeCommand;
+import io.gravitee.cockpit.api.command.v1.CockpitCommandType;
+import io.gravitee.cockpit.api.command.v1.node.NodeCommand;
+import io.gravitee.exchange.api.command.Command;
+import io.gravitee.exchange.api.connector.ExchangeConnector;
+import io.gravitee.exchange.api.websocket.protocol.legacy.ignored.IgnoredReply;
 import io.gravitee.node.api.Monitoring;
 import io.gravitee.node.api.healthcheck.HealthCheck;
 import io.gravitee.node.api.healthcheck.Result;
@@ -58,7 +59,7 @@ class MonitoringCollectorServiceTest {
     private NodeMonitoringService nodeMonitoringService;
 
     @Mock
-    private CockpitConnector cockpitConnector;
+    private ExchangeConnector cockpitConnector;
 
     @Mock
     private TaskScheduler taskScheduler;
@@ -69,25 +70,26 @@ class MonitoringCollectorServiceTest {
     private MonitoringCollectorService cut;
 
     @Captor
-    private ArgumentCaptor<Command> commandArgumentCaptor;
+    private ArgumentCaptor<Command<?>> commandArgumentCaptor;
 
     @BeforeEach
     public void initMocks() {
+        lenient().when(cockpitConnector.isActive()).thenReturn(true);
         lenient().when(cockpitConnector.isPrimary()).thenReturn(true);
 
         cut = new MonitoringCollectorService(nodeMonitoringService, cockpitConnector, taskScheduler, objectMapper);
-        cut.ready = true;
     }
 
     @Test
-    public void collectAndSendNotReady() {
-        cut.ready = false;
+    void collectAndSendNotReady() {
+        lenient().when(cockpitConnector.isActive()).thenReturn(false);
         cut.collectAndSend();
-        verifyNoInteractions(objectMapper, nodeMonitoringService, cockpitConnector);
+        verifyNoInteractions(objectMapper, nodeMonitoringService);
+        verify(cockpitConnector, never()).sendCommand(any());
     }
 
     @Test
-    public void collectAndSend_notPrimary() {
+    void collectAndSend_notPrimary() {
         when(cockpitConnector.isPrimary()).thenReturn(false);
 
         cut.collectAndSend();
@@ -95,7 +97,7 @@ class MonitoringCollectorServiceTest {
     }
 
     @Test
-    public void collectAndSend() throws JsonProcessingException {
+    void collectAndSend() throws JsonProcessingException {
         final NodeInfos nodeInfos = new NodeInfos();
         nodeInfos.setEvaluatedAt(System.currentTimeMillis());
         nodeInfos.setStatus(NodeStatus.STARTED);
@@ -139,14 +141,17 @@ class MonitoringCollectorServiceTest {
 
         verify(cockpitConnector, times(2)).sendCommand(commandArgumentCaptor.capture());
 
-        List<Command> commands = commandArgumentCaptor.getAllValues();
+        List<Command<?>> commands = commandArgumentCaptor.getAllValues();
 
-        assertThat(commands.stream().filter(cmd -> cmd.getType() == Command.Type.HEALTHCHECK_COMMAND).findAny().isPresent()).isTrue();
+        assertThat(commands.stream().anyMatch(cmd -> cmd.getType().equals(CockpitCommandType.NODE_HEALTHCHECK.name()))).isTrue();
 
-        Optional<Command> optionalNodeCommand = commands.stream().filter(cmd -> cmd.getType() == Command.Type.NODE_COMMAND).findAny();
-        assertThat(optionalNodeCommand.isPresent()).isTrue();
+        Optional<Command<?>> optionalNodeCommand = commands
+            .stream()
+            .filter(cmd -> cmd.getType().equals(CockpitCommandType.NODE.name()))
+            .findAny();
+        assertThat(optionalNodeCommand).isPresent();
         NodeCommand nodeCommand = (NodeCommand) optionalNodeCommand.get();
-        assertThat(nodeCommand.getPayload().getShardingTags().size()).isEqualTo(2);
-        assertThat(nodeCommand.getPayload().getShardingTags()).contains("tag1", "tag2");
+        assertThat(nodeCommand.getPayload().shardingTags()).hasSize(2);
+        assertThat(nodeCommand.getPayload().shardingTags()).contains("tag1", "tag2");
     }
 }
