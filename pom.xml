@@ -43,7 +43,7 @@
         <gravitee-node.version>4.0.0</gravitee-node.version>
         <gravitee-plugin.version>2.0.1</gravitee-plugin.version>
         <gravitee-alert-api.version>2.0.0</gravitee-alert-api.version>
-        <gravitee-cockpit-api.version>2.1.0</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>2.6.2</gravitee-cockpit-api.version>
     </properties>
 
     <dependencyManagement>
