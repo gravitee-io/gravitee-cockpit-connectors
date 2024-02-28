@@ -1,3 +1,10 @@
+## [4.0.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.3...4.0.4) (2024-02-28)
+
+
+### Bug Fixes
+
+* **chore:** update gravitee dependencies ([515636a](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/515636a28fdeebd97ba101a4bbdbc15a6acf187d))
+
 ## [4.0.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.2...4.0.3) (2024-02-12)
 
 
