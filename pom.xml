@@ -40,7 +40,7 @@
 
     <properties>
         <gravitee-bom.version>7.0.13</gravitee-bom.version>
-        <gravitee-node.version>5.9.1</gravitee-node.version>
+        <gravitee-node.version>5.10.0</gravitee-node.version>
         <gravitee-plugin.version>3.1.0</gravitee-plugin.version>
         <gravitee-alert-api.version>2.0.0</gravitee-alert-api.version>
         <gravitee-cockpit-api.version>2.6.2</gravitee-cockpit-api.version>
