@@ -1,3 +1,10 @@
+## [4.0.8](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.7...4.0.8) (2024-03-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee.cockpit:gravitee-cockpit-api to v2.6.6 ([2815b86](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/2815b862ccfbfd665328b3cb5f11e9a2cf888fc2))
+
 ## [4.0.7](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.6...4.0.7) (2024-03-18)
 
 
