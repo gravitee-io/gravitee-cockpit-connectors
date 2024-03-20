@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.8...5.0.0) (2024-03-20)
+
+
+### Features
+
+* use new exchange framework ([6e2b7c2](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/6e2b7c2baacc2bf31deb50ebd8248447bfa10720))
+
+
+### BREAKING CHANGES
+
+* using this version will imply migration on connectors
+
 ## [4.0.8](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/4.0.7...4.0.8) (2024-03-18)
 
 
