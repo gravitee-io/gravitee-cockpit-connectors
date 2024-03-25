@@ -1,3 +1,10 @@
+## [5.0.2](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.1...5.0.2) (2024-03-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee:gravitee-bom to v7.0.14 ([dd54edf](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/dd54edfe27c35478e80f46d5b6efac0bfd1accd6))
+
 ## [5.0.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.0...5.0.1) (2024-03-25)
 
 
