@@ -16,7 +16,6 @@
 package io.gravitee.cockpit.connectors.ws;
 
 import io.gravitee.cockpit.api.CockpitConnector;
-import io.gravitee.cockpit.api.command.websocket.CockpitExchangeSerDe;
 import io.gravitee.cockpit.connectors.ws.command.CockpitConnectorCommandContext;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.exchange.api.command.Command;
@@ -34,7 +33,6 @@ import io.gravitee.exchange.connector.websocket.client.WebSocketConnectorClientF
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.rxjava3.core.Vertx;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +44,6 @@ import org.springframework.context.annotation.Lazy;
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
-// This class is instanciated as a Spring Component by Gravitee Node
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
 public class WebSocketCockpitConnector extends AbstractService<CockpitConnector> implements CockpitConnector {
 
