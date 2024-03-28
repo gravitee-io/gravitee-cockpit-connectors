@@ -16,6 +16,7 @@
 package io.gravitee.cockpit.connectors.ws;
 
 import io.gravitee.cockpit.api.CockpitConnector;
+import io.gravitee.cockpit.api.command.websocket.CockpitExchangeSerDe;
 import io.gravitee.cockpit.connectors.ws.command.CockpitConnectorCommandContext;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.exchange.api.command.Command;
@@ -68,7 +69,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
     @Autowired
     @Qualifier("cockpitExchangeSerDe")
-    private final ExchangeSerDe cockpitExchangeSerDe;
+    private final CockpitExchangeSerDe cockpitExchangeSerDe;
 
     @Value("${cockpit.enabled:false}")
     private boolean enabled;
