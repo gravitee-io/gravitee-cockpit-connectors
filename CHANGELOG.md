@@ -1,3 +1,10 @@
+## [5.0.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.2...5.0.3) (2024-03-28)
+
+
+### Bug Fixes
+
+* remove RequiredArgsConstructor which was overriding spring qualifier ([5c67350](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/5c673503356d8317b658c97b11bbec62d5af9cac))
+
 ## [5.0.2](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.1...5.0.2) (2024-03-25)
 
 
