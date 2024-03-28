@@ -16,6 +16,7 @@
 package io.gravitee.cockpit.connectors.ws;
 
 import io.gravitee.cockpit.api.CockpitConnector;
+import io.gravitee.cockpit.api.command.websocket.CockpitExchangeSerDe;
 import io.gravitee.cockpit.connectors.ws.command.CockpitConnectorCommandContext;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.exchange.api.command.Command;
@@ -45,8 +46,9 @@ import org.springframework.context.annotation.Lazy;
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
+// This class is instanciated as a Spring Component by Gravitee Node
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Slf4j
-@RequiredArgsConstructor
 public class WebSocketCockpitConnector extends AbstractService<CockpitConnector> implements CockpitConnector {
 
     public static final ProtocolVersion PROTOCOL_VERSION = ProtocolVersion.V1;
@@ -55,20 +57,20 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     private Vertx vertx;
 
     @Autowired
-    private final ExchangeConnectorManager exchangeConnectorManager;
+    private ExchangeConnectorManager exchangeConnectorManager;
 
     @Autowired
     @Lazy
     @Qualifier("cockpitConnectorCommandHandlersFactory")
-    private final ConnectorCommandHandlersFactory cockpitConnectorCommandHandlersFactory;
+    private ConnectorCommandHandlersFactory cockpitConnectorCommandHandlersFactory;
 
     @Autowired
     @Qualifier("cockpitWebsocketConnectorClientFactory")
-    private final WebSocketConnectorClientFactory cockpitWebsocketConnectorClientFactory;
+    private WebSocketConnectorClientFactory cockpitWebsocketConnectorClientFactory;
 
     @Autowired
     @Qualifier("cockpitExchangeSerDe")
-    private final ExchangeSerDe cockpitExchangeSerDe;
+    private ExchangeSerDe cockpitExchangeSerDe;
 
     @Value("${cockpit.enabled:false}")
     private boolean enabled;
