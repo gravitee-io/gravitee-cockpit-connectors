@@ -15,9 +15,17 @@
  */
 package io.gravitee.cockpit.connectors.core.services;
 
+import static io.gravitee.cockpit.connectors.core.spring.MonitoringCollectorConfiguration.DEFAULT_CRON_TRIGGER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,7 +86,13 @@ class MonitoringCollectorServiceTest {
         lenient().when(cockpitConnector.isActive()).thenReturn(true);
         lenient().when(cockpitConnector.isPrimary()).thenReturn(true);
 
-        cut = new MonitoringCollectorService(nodeMonitoringService, cockpitConnector, taskScheduler, objectMapper);
+        cut = new MonitoringCollectorService(nodeMonitoringService, taskScheduler, DEFAULT_CRON_TRIGGER, objectMapper);
+        cut.start(cockpitConnector);
+    }
+
+    @AfterEach
+    public void afterEach() {
+        cut.stop();
     }
 
     @Test
