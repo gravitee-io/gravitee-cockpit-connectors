@@ -29,11 +29,9 @@ import io.gravitee.node.api.infos.PluginInfos;
 import io.gravitee.node.monitoring.NodeMonitoringService;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
@@ -43,62 +41,75 @@ import org.springframework.scheduling.support.CronTrigger;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class MonitoringCollectorService implements InitializingBean {
-
-    @Value("${cockpit.monitoring.cron:*/5 * * * * *}")
-    private String cronTrigger;
+public class MonitoringCollectorService {
 
     private final NodeMonitoringService nodeMonitoringService;
-    private final ExchangeConnector exchangeConnector;
     private final TaskScheduler taskScheduler;
+    private final String cronTrigger;
     private final ObjectMapper objectMapper;
 
     private long lastRefreshAt;
     private long lastDelay;
+    private ExchangeConnector exchangeConnector;
+    private ScheduledFuture<?> cronTask;
 
-    @Override
-    public void afterPropertiesSet() {
-        log.info("Starting monitoring collector service");
+    public void start(final ExchangeConnector exchangeConnector) {
+        log.info("Starting cockpit monitoring collector service");
+        if (this.exchangeConnector != null) {
+            this.stop();
+        }
+        this.exchangeConnector = exchangeConnector;
+        this.lastRefreshAt = System.currentTimeMillis() - ChronoUnit.HOURS.getDuration().toMillis();
+        this.lastDelay = 0;
+        this.cronTask = taskScheduler.schedule(this::collectAndSend, new CronTrigger(cronTrigger));
+    }
 
-        lastRefreshAt = System.currentTimeMillis() - ChronoUnit.HOURS.getDuration().toMillis();
-        lastDelay = 0;
-
-        taskScheduler.schedule(this::collectAndSend, new CronTrigger(cronTrigger));
+    public void stop() {
+        log.info("Stopping cockpit monitoring collector service");
+        this.exchangeConnector = null;
+        if (this.cronTask != null) {
+            this.cronTask.cancel(false);
+            this.cronTask = null;
+        }
     }
 
     protected void collectAndSend() {
-        if (!exchangeConnector.isActive()) {
-            log.debug("Cockpit connector is not ready to accept command or installation is not accepted yet. Skip monitoring propagation.");
-            return;
+        if (exchangeConnector != null) {
+            if (!exchangeConnector.isActive()) {
+                log.debug(
+                    "Cockpit connector is not ready to accept command or installation is not accepted yet. Skip monitoring propagation."
+                );
+                return;
+            }
+
+            if (!exchangeConnector.isPrimary()) {
+                log.debug("Cockpit connector is not primary. Skip monitoring propagation.");
+                return;
+            }
+
+            long from = lastRefreshAt - lastDelay;
+            long nextLastRefreshAt = System.currentTimeMillis();
+
+            log.debug("Collecting and sending monitoring data to Cockpit");
+
+            // First send node infos.
+            nodeMonitoringService
+                .findByTypeAndTimeframe(Monitoring.NODE_INFOS, from, nextLastRefreshAt)
+                .map(this::convertToNodeCommand)
+                .flatMapSingle(exchangeConnector::sendCommand)
+                .blockingSubscribe();
+
+            // Then send health checks.
+            nodeMonitoringService
+                .findByTypeAndTimeframe(Monitoring.HEALTH_CHECK, from, nextLastRefreshAt)
+                .map(this::convertToHealthCheckCommand)
+                .flatMapSingle(exchangeConnector::sendCommand)
+                .blockingSubscribe();
+
+            lastRefreshAt = nextLastRefreshAt;
+            // Adding one second delay to make sure we don't miss events
+            lastDelay = System.currentTimeMillis() - nextLastRefreshAt + ChronoUnit.SECONDS.getDuration().toMillis();
         }
-
-        if (!exchangeConnector.isPrimary()) {
-            log.debug("Cockpit connector is not primary. Skip monitoring propagation.");
-            return;
-        }
-
-        long from = lastRefreshAt - lastDelay;
-        long nextLastRefreshAt = System.currentTimeMillis();
-
-        log.debug("Collecting and sending monitoring data to Cockpit");
-
-        // First send node infos.
-        nodeMonitoringService
-            .findByTypeAndTimeframe(Monitoring.NODE_INFOS, from, nextLastRefreshAt)
-            .map(this::convertToNodeCommand)
-            .flatMapSingle(exchangeConnector::sendCommand)
-            .blockingSubscribe();
-
-        // Then send health checks.
-        nodeMonitoringService
-            .findByTypeAndTimeframe(Monitoring.HEALTH_CHECK, from, nextLastRefreshAt)
-            .map(this::convertToHealthCheckCommand)
-            .flatMapSingle(exchangeConnector::sendCommand)
-            .blockingSubscribe();
-
-        lastRefreshAt = nextLastRefreshAt;
-        // Adding one second delay to make sure we don't miss events
-        lastDelay = System.currentTimeMillis() - nextLastRefreshAt + ChronoUnit.SECONDS.getDuration().toMillis();
     }
 
     private NodeCommand convertToNodeCommand(Monitoring monitoring) throws JsonProcessingException {

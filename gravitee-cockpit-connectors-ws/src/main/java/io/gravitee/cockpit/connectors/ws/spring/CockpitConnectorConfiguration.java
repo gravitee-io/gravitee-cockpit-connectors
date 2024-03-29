@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.gravitee.cockpit.api.command.websocket.CockpitExchangeSerDe;
+import io.gravitee.cockpit.connectors.core.spring.MonitoringCollectorConfiguration;
 import io.gravitee.exchange.api.configuration.IdentifyConfiguration;
 import io.gravitee.exchange.connector.websocket.client.WebSocketClientConfiguration;
 import io.gravitee.exchange.connector.websocket.client.WebSocketConnectorClientFactory;
@@ -38,7 +39,7 @@ import org.springframework.core.env.Environment;
  * @author GraviteeSource Team
  */
 @Configuration
-@Import({ ConnectorWebSocketConfiguration.class })
+@Import({ ConnectorWebSocketConfiguration.class, MonitoringCollectorConfiguration.class })
 public class CockpitConnectorConfiguration {
 
     @Bean("cockpitIdentifyConfiguration")

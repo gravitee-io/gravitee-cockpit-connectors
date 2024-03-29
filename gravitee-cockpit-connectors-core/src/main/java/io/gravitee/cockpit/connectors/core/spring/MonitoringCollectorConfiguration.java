@@ -17,9 +17,9 @@ package io.gravitee.cockpit.connectors.core.spring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.connectors.core.services.MonitoringCollectorService;
-import io.gravitee.exchange.api.connector.ExchangeConnector;
 import io.gravitee.node.monitoring.NodeMonitoringService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -29,16 +29,18 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
  */
 public class MonitoringCollectorConfiguration {
 
+    public static final String DEFAULT_CRON_TRIGGER = "*/5 * * * * *";
+
     @Bean
     MonitoringCollectorService monitoringCollectorService(
         NodeMonitoringService nodeMonitoringService,
-        @Qualifier("cockpitConnector") ExchangeConnector cockpitConnector,
-        @Qualifier("cockpitObjectMapper") ObjectMapper objectMapper
+        @Qualifier("cockpitObjectMapper") ObjectMapper objectMapper,
+        @Value("${cockpit.monitoring.cron:" + DEFAULT_CRON_TRIGGER + "}") String cronTrigger
     ) {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.setThreadNamePrefix("cockpit-monitoring-collector-");
         taskScheduler.setPoolSize(1);
         taskScheduler.initialize();
-        return new MonitoringCollectorService(nodeMonitoringService, cockpitConnector, taskScheduler, objectMapper);
+        return new MonitoringCollectorService(nodeMonitoringService, taskScheduler, cronTrigger, objectMapper);
     }
 }

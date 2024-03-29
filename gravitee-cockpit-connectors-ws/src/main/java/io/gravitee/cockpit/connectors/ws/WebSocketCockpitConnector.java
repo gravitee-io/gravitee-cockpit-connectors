@@ -16,7 +16,7 @@
 package io.gravitee.cockpit.connectors.ws;
 
 import io.gravitee.cockpit.api.CockpitConnector;
-import io.gravitee.cockpit.api.command.websocket.CockpitExchangeSerDe;
+import io.gravitee.cockpit.connectors.core.services.MonitoringCollectorService;
 import io.gravitee.cockpit.connectors.ws.command.CockpitConnectorCommandContext;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.exchange.api.command.Command;
@@ -31,10 +31,10 @@ import io.gravitee.exchange.api.websocket.command.ExchangeSerDe;
 import io.gravitee.exchange.api.websocket.protocol.ProtocolVersion;
 import io.gravitee.exchange.connector.websocket.WebSocketExchangeConnector;
 import io.gravitee.exchange.connector.websocket.client.WebSocketConnectorClientFactory;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.rxjava3.core.Vertx;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +72,9 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     @Qualifier("cockpitExchangeSerDe")
     private ExchangeSerDe cockpitExchangeSerDe;
 
+    @Autowired
+    private MonitoringCollectorService monitoringCollectorService;
+
     @Value("${cockpit.enabled:false}")
     private boolean enabled;
 
@@ -106,11 +109,19 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                     cockpitExchangeSerDe
                 );
 
-            exchangeConnectorManager.register(websocketExchangeConnector).blockingAwait();
+            exchangeConnectorManager
+                .register(websocketExchangeConnector)
+                .andThen(
+                    Completable
+                        .fromRunnable(() -> monitoringCollectorService.start(websocketExchangeConnector))
+                        .doOnError(throwable -> log.warn("Unable to start monitoring collector for cockpit connector"))
+                        .onErrorComplete()
+                )
+                .blockingAwait();
             log.info("Cockpit connector started successfully.");
-
             // Register shutdown hook
             Thread shutdownHook = new ContainerShutdownHook(websocketExchangeConnector);
+
             Runtime.getRuntime().addShutdownHook(shutdownHook);
         } else {
             log.info("Cockpit connector is disabled.");
@@ -120,6 +131,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     @Override
     protected void doStop() throws Exception {
         super.doStop();
+        this.monitoringCollectorService.stop();
     }
 
     @Override
