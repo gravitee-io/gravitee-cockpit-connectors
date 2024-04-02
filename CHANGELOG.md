@@ -1,3 +1,10 @@
+## [5.0.5](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.4...5.0.5) (2024-04-02)
+
+
+### Bug Fixes
+
+* re-implement monitoring collector service ([5d47500](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/5d47500295d2fea6d2acd432d40b5ad4809c9f52))
+
 ## [5.0.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.3...5.0.4) (2024-04-02)
 
 
