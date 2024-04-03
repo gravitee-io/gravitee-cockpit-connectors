@@ -17,7 +17,7 @@ Currently, the following connectors are implemented:
 The minimum requirement is :
 
 * Maven3
-* Jdk11
+* Jdk17
 
 For user gravitee snapshot, You need to declare the following repository in your maven settings :
 
@@ -38,29 +38,16 @@ or AM installation.
 
 ## Configuration
 
-Some configuration properties need to be defined in order to make the connector work.
+> After setting the configuration properties you will have to restart your instance.
 
----
-**NOTE**
+| Parameter                                     | default | Description                                                                    |
+|-----------------------------------------------|---------|--------------------------------------------------------------------------------|
+| cockpit.enabled                               | false   | Is cockpit connector enabled or not                                            |
+| cockpit.connector.ws.endpoints                |         | An array of cockpit endpoints urls to contact.                                 |
+| cockpit.connector.ws.ssl.keystore.type        | PKCS12  | The keystore type (PKCS12, PEM, JKS)                                           |
+| cockpit.connector.ws.ssl.keystore.path        |         | The path to the keystore used for Mutual TLS communication with Cockpit server |
+| cockpit.connector.ws.ssl.keystore.password    |         | The password to used to access to protected keys                               |
+| cockpit.connector.ws.ssl.truststore.type      | PKCS12  | The truststore type (PKCS12, PEM, JKS)                                         |
+| cockpit.connector.ws.ssl.truststore.path      |         | The path to the truststore used to trust the Cockpit server                    |
+| cockpit.connector.ws.ssl.truststore.password  |         | The password to used to access the truststore information                      |
 
-After setting the configuration properties you will have to restart your instance.
-
----
-
-### Common connector configuration
-
-| Parameter                   | default | Description                                                                    |
-|-----------------------------|---------|--------------------------------------------------------------------------------|
-| cockpit.enabled             | false   | Is cockpit connector enabled or not                                            |
-| cockpit.keystore.type       | PKCS12  | The keystore type (PKCS12, PEM, JKS)                                           |
-| cockpit.keystore.path       |         | The path to the keystore used for Mutual TLS communication with Cockpit server |
-| cockpit.keystore.password   |         | The password to used to access to protected keys                               |
-| cockpit.truststore.type     | PKCS12  | The truststore type (PKCS12, PEM, JKS)                                         |
-| cockpit.truststore.path     |         | The path to the truststore used to trust the Cockpit server                    |
-| cockpit.truststore.password |         | The password to used to access the truststore information                      |
-
-### WebSocket connector (ws)
-
-| Parameter            | default | Description                                    |
-|----------------------|---------|------------------------------------------------|
-| cockpit.ws.endpoints |         | An array of cockpit endpoints urls to contact. |
