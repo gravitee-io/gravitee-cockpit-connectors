@@ -1,3 +1,10 @@
+## [5.0.8](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.7...5.0.8) (2024-04-09)
+
+
+### Bug Fixes
+
+* align exchange version with cockpit api ([2c46f0d](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/2c46f0d92cb8d7cac6b01dc181031f38713fe671))
+
 ## [5.0.7](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.6...5.0.7) (2024-04-09)
 
 
