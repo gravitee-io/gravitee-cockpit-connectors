@@ -44,7 +44,7 @@ public class CockpitConnectorConfiguration {
 
     @Bean("cockpitIdentifyConfiguration")
     public IdentifyConfiguration cockpitIdentifyConfiguration(final Environment environment) {
-        return new IdentifyConfiguration(environment, "cockpit", FALLBACK_KEYS);
+        return new IdentifyConfiguration(environment, "cloud", FALLBACK_KEYS);
     }
 
     @Bean("cockpitWebsocketConnectorClientFactory")
