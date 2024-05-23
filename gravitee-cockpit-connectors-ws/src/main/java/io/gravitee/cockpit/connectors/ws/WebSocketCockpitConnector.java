@@ -75,7 +75,7 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     @Autowired
     private MonitoringCollectorService monitoringCollectorService;
 
-    @Value("${cockpit.enabled:false}")
+    @Value("${cockpit.enabled:${cloud.enabled:false}}")
     private boolean enabled;
 
     private WebSocketExchangeConnector websocketExchangeConnector;
