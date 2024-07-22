@@ -1,3 +1,10 @@
+## [5.0.24](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.23...5.0.24) (2024-07-22)
+
+
+### Bug Fixes
+
+* **deps:** update gravitee-exchange.version ([8e7648f](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/8e7648fbdfc3f1254651a7dc045dd0c3701aef83))
+
 ## [5.0.23](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.22...5.0.23) (2024-07-22)
 
 
