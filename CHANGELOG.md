@@ -1,3 +1,10 @@
+## [5.0.26](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.25...5.0.26) (2024-07-23)
+
+
+### Bug Fixes
+
+* bump exchange framework version ([bcf3dee](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/bcf3dee6f3cf44a817a25fa824c453f6f7f3fcc7))
+
 ## [5.0.25](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.24...5.0.25) (2024-07-23)
 
 
