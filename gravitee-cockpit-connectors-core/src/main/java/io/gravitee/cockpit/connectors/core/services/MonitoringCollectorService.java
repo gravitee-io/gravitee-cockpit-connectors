@@ -97,6 +97,8 @@ public class MonitoringCollectorService {
                 .findByTypeAndTimeframe(Monitoring.NODE_INFOS, from, nextLastRefreshAt)
                 .map(this::convertToNodeCommand)
                 .flatMapSingle(exchangeConnector::sendCommand)
+                .doOnError(throwable -> log.warn("Unable to send monitoring NODE_INFO", throwable))
+                .onErrorComplete()
                 .blockingSubscribe();
 
             // Then send health checks.
@@ -104,6 +106,8 @@ public class MonitoringCollectorService {
                 .findByTypeAndTimeframe(Monitoring.HEALTH_CHECK, from, nextLastRefreshAt)
                 .map(this::convertToHealthCheckCommand)
                 .flatMapSingle(exchangeConnector::sendCommand)
+                .doOnError(throwable -> log.warn("Unable to send monitoring HEALTH_CHECK", throwable))
+                .onErrorComplete()
                 .blockingSubscribe();
 
             lastRefreshAt = nextLastRefreshAt;
