@@ -1,3 +1,11 @@
+## [5.0.27](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.26...5.0.27) (2024-07-25)
+
+
+### Bug Fixes
+
+* add missing error handler when sending commands ([19970cb](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/19970cbd8e67acb4c373d7e820cc8a3384110e1b))
+* bump exchange framework to 1.8.0 ([9f91b94](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/9f91b948a1be5d3dbdc310daea14989869f5df7c))
+
 ## [5.0.26](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.25...5.0.26) (2024-07-23)
 
 
