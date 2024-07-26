@@ -1,3 +1,10 @@
+## [5.0.28](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.27...5.0.28) (2024-07-26)
+
+
+### Bug Fixes
+
+* bump exchange framework to 1.8.2 ([d8e468b](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/d8e468b1fc2fe7d2d85c2fe413533bb82dbdeb3a))
+
 ## [5.0.27](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.26...5.0.27) (2024-07-25)
 
 

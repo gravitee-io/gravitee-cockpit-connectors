@@ -24,7 +24,7 @@
     <parent>
         <artifactId>gravitee-cockpit-connectors</artifactId>
         <groupId>io.gravitee.cockpit</groupId>
-        <version>5.0.27</version>
+        <version>5.0.28</version>
     </parent>
 
     <artifactId>gravitee-cockpit-connectors-ws</artifactId>
