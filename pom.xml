@@ -97,6 +97,7 @@
                 <groupId>io.gravitee.exchange</groupId>
                 <artifactId>gravitee-exchange-api</artifactId>
                 <version>${gravitee-exchange.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.gravitee.exchange</groupId>
