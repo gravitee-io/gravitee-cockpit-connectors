@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.cockpit.api.command.v1.CockpitCommandType;
+import io.gravitee.cockpit.api.command.v1.MetadataConstants;
 import io.gravitee.cockpit.api.command.v1.node.NodeCommand;
 import io.gravitee.exchange.api.command.Command;
 import io.gravitee.exchange.api.connector.ExchangeConnector;
@@ -43,10 +44,7 @@ import io.gravitee.node.api.infos.PluginInfos;
 import io.gravitee.node.monitoring.NodeMonitoringService;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -130,6 +128,7 @@ class MonitoringCollectorServiceTest {
 
         nodeInfos.setPluginInfos(Collections.singleton(pluginInfos));
         nodeInfos.setTags(List.of("tag1", "tag2", ""));
+        nodeInfos.setMetadata(Map.of(MetadataConstants.GATEWAY_ID, "technicalId#1"));
 
         final HealthCheck healthCheck = new HealthCheck();
         final HashMap<String, Result> results = new HashMap<>();
@@ -168,5 +167,6 @@ class MonitoringCollectorServiceTest {
         NodeCommand nodeCommand = (NodeCommand) optionalNodeCommand.get();
         assertThat(nodeCommand.getPayload().shardingTags()).hasSize(2);
         assertThat(nodeCommand.getPayload().shardingTags()).contains("tag1", "tag2");
+        assertThat(nodeCommand.getPayload().metadata()).contains(Map.entry(MetadataConstants.GATEWAY_ID, "technicalId#1"));
     }
 }
