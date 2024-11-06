@@ -132,6 +132,7 @@ public class MonitoringCollectorService {
                 .tenant(nodeInfos.getTenant())
                 .jdkVersion(nodeInfos.getJdkVersion())
                 .plugins(nodeInfos.getPluginInfos().stream().map(this::convertToNodePlugin).toList())
+                .metadata(nodeInfos.getMetadata())
                 .build()
         );
     }
