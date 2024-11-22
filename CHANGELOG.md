@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.37...5.1.0) (2024-11-22)
+
+
+### Features
+
+* add metadata property to NodeCommandPayload ([0d8584a](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/0d8584ac3b7bf4b2f1bff6a8c4113181cd6d2892))
+
 ## [5.0.37](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.0.36...5.0.37) (2024-11-20)
 
 
