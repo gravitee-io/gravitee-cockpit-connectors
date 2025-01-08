@@ -23,6 +23,14 @@ For user gravitee snapshot, You need to declare the following repository in your
 
 https://oss.sonatype.org/content/repositories/snapshots
 
+## Compatibility matrix
+
+| Connector version | APIM Version   | AM Version     |
+|-------------------|----------------|----------------|
+| 5.1.x             | 4.6.x to upper | N/A            |
+| 5.0.x             | 4.4.x to 4.5.x | 4.4.x to upper |
+| 4.0.x             | 4.2.x to 4.3.x | 4.2.x to 4.3.x |
+
 ## Building
 
 ```
