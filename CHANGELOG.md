@@ -1,3 +1,10 @@
+## [5.1.9](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.8...5.1.9) (2025-03-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee.cockpit:gravitee-cockpit-api to v3.7.12 ([f3c9604](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/f3c9604a4b4aa2f6b518341a3728081129629a1e))
+
 ## [5.1.8](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.7...5.1.8) (2025-02-24)
 
 
