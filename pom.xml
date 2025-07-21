@@ -29,7 +29,7 @@
 
     <groupId>io.gravitee.cockpit</groupId>
     <artifactId>gravitee-cockpit-connectors</artifactId>
-    <version>5.1.30</version>
+    <version>5.1.31</version>
     <packaging>pom</packaging>
     <name>Gravitee.io - Cockpit - Connectors</name>
 
