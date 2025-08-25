@@ -1,3 +1,10 @@
+## [5.1.38](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.37...5.1.38) (2025-08-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee.alert:gravitee-alert-api to v2.1.13 ([b895ed9](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/b895ed935c185d00f17ac4888702fea8efe75d26))
+
 ## [5.1.37](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.36...5.1.37) (2025-08-25)
 
 
