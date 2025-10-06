@@ -42,7 +42,7 @@
         <gravitee-bom.version>8.3.45</gravitee-bom.version>
         <gravitee-node.version>7.8.1</gravitee-node.version>
         <gravitee-plugin.version>4.7.2</gravitee-plugin.version>
-        <gravitee-alert-api.version>2.1.15</gravitee-alert-api.version>
+        <gravitee-alert-api.version>2.1.18</gravitee-alert-api.version>
         <gravitee-cockpit-api.version>3.8.28</gravitee-cockpit-api.version>
         <gravitee-exchange.version>1.9.0</gravitee-exchange.version>
 
