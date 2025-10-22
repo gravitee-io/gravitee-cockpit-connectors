@@ -1,3 +1,10 @@
+## [5.1.47](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.46...5.1.47) (2025-10-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.gravitee.cockpit:gravitee-cockpit-api to v3.11.6 ([cf61d2f](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/cf61d2f4fa55b28fa64f2ebebbe57d8451219ea8))
+
 ## [5.1.46](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.45...5.1.46) (2025-10-13)
 
 
