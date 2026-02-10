@@ -20,10 +20,7 @@ import io.gravitee.cockpit.connectors.core.services.MonitoringCollectorService;
 import io.gravitee.cockpit.connectors.ws.command.CockpitConnectorCommandContext;
 import io.gravitee.common.service.AbstractService;
 import io.gravitee.exchange.api.command.Command;
-import io.gravitee.exchange.api.command.CommandAdapter;
-import io.gravitee.exchange.api.command.CommandHandler;
 import io.gravitee.exchange.api.command.Reply;
-import io.gravitee.exchange.api.command.ReplyAdapter;
 import io.gravitee.exchange.api.connector.ConnectorCommandHandlersFactory;
 import io.gravitee.exchange.api.connector.ExchangeConnector;
 import io.gravitee.exchange.api.connector.ExchangeConnectorManager;
@@ -34,7 +31,6 @@ import io.gravitee.exchange.connector.websocket.client.WebSocketConnectorClientF
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.rxjava3.core.Vertx;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,14 +83,12 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
             log.info("Cockpit connector is enabled. Starting connector...");
             CockpitConnectorCommandContext integrationConnectorCommandContext = new CockpitConnectorCommandContext();
 
-            List<CommandHandler<? extends Command<?>, ? extends Reply<?>>> connectorCommandHandlers = cockpitConnectorCommandHandlersFactory.buildCommandHandlers(
-                integrationConnectorCommandContext
-            );
-            List<CommandAdapter<? extends Command<?>, ? extends Command<?>, ? extends Reply<?>>> connectorCommandAdapters = cockpitConnectorCommandHandlersFactory.buildCommandAdapters(
+            var connectorCommandHandlers = cockpitConnectorCommandHandlersFactory.buildCommandHandlers(integrationConnectorCommandContext);
+            var connectorCommandAdapters = cockpitConnectorCommandHandlersFactory.buildCommandAdapters(
                 integrationConnectorCommandContext,
                 PROTOCOL_VERSION
             );
-            List<ReplyAdapter<? extends Reply<?>, ? extends Reply<?>>> connectorReplyAdapters = cockpitConnectorCommandHandlersFactory.buildReplyAdapters(
+            var connectorReplyAdapters = cockpitConnectorCommandHandlersFactory.buildReplyAdapters(
                 integrationConnectorCommandContext,
                 PROTOCOL_VERSION
             );
@@ -117,12 +111,16 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                         .doOnError(throwable -> log.warn("Unable to start monitoring collector for cockpit connector"))
                         .onErrorComplete()
                 )
-                .blockingAwait();
-            log.info("Cockpit connector started successfully.");
-            // Register shutdown hook
-            Thread shutdownHook = new ContainerShutdownHook(websocketExchangeConnector);
+                .subscribe(
+                    () -> {
+                        log.info("Cockpit connector started successfully.");
+                        // Register shutdown hook
+                        Thread shutdownHook = new ContainerShutdownHook(websocketExchangeConnector);
 
-            Runtime.getRuntime().addShutdownHook(shutdownHook);
+                        Runtime.getRuntime().addShutdownHook(shutdownHook);
+                    },
+                    th -> log.error("Unable to start cockpit connector", th)
+                );
         } else {
             log.info("Cockpit connector is disabled.");
         }
@@ -137,14 +135,12 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
     @Override
     public Single<Reply<?>> sendCommand(final Command<?> command) {
         return Single
-            .fromCallable(() -> this.websocketExchangeConnector.isActive())
-            .flatMap(isActive -> {
-                if (isActive) {
-                    return this.websocketExchangeConnector.sendCommand(command);
-                } else {
-                    return Single.error(new IllegalStateException("CockpitConnector is not ready yet."));
-                }
-            });
+            .fromCallable(() -> websocketExchangeConnector.isActive())
+            .flatMap(active ->
+                active
+                    ? websocketExchangeConnector.sendCommand(command)
+                    : Single.error(new IllegalStateException("CockpitConnector is not ready yet."))
+            );
     }
 
     private class ContainerShutdownHook extends Thread {
