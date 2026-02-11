@@ -1,3 +1,10 @@
+## [5.1.65](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.64...5.1.65) (2026-02-11)
+
+
+### Bug Fixes
+
+* don’t block the starting when cockpit is not accessible ([5942ed0](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/5942ed053b7caa9f512ad55f120a5c7880120fab))
+
 ## [5.1.64](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.63...5.1.64) (2026-02-09)
 
 
