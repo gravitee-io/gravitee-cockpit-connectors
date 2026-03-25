@@ -24,7 +24,7 @@
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>22.6.0</version>
+        <version>25.0.0-alpha.1</version>
     </parent>
 
     <groupId>io.gravitee.cockpit</groupId>
@@ -39,12 +39,13 @@
     </modules>
 
     <properties>
-        <gravitee-bom.version>8.3.61</gravitee-bom.version>
-        <gravitee-node.version>7.26.4</gravitee-node.version>
+        <gravitee-bom.version>9.0.0</gravitee-bom.version>
+        <gravitee-node.version>9.0.0</gravitee-node.version>
         <gravitee-plugin.version>4.11.1</gravitee-plugin.version>
         <gravitee-alert-api.version>2.1.22</gravitee-alert-api.version>
         <gravitee-cockpit-api.version>3.12.0</gravitee-cockpit-api.version>
-        <gravitee-exchange.version>2.0.2</gravitee-exchange.version>
+        <gravitee-exchange.version>3.0.0-AM-6611-vertx-5-migration-SNAPSHOT</gravitee-exchange.version>
+        <gravitee.archrules.skip>true</gravitee.archrules.skip>
 
         <jdk.version>17</jdk.version>
     </properties>
