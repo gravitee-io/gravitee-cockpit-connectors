@@ -43,7 +43,7 @@
         <gravitee-node.version>8.0.0-beta.2</gravitee-node.version>
         <gravitee-plugin.version>4.10.0</gravitee-plugin.version>
         <gravitee-alert-api.version>2.1.22</gravitee-alert-api.version>
-        <gravitee-cockpit-api.version>3.11.19</gravitee-cockpit-api.version>
+        <gravitee-cockpit-api.version>4.0.0-AM-6611-vertx-5-migration-SNAPSHOT</gravitee-cockpit-api.version>
         <gravitee-exchange.version>3.0.0-AM-6611-vertx-5-migration-SNAPSHOT</gravitee-exchange.version>
         <gravitee.archrules.skip>true</gravitee.archrules.skip>
 
