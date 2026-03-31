@@ -1,3 +1,16 @@
+# [6.0.0-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.65...6.0.0-alpha.1) (2026-03-31)
+
+
+### Features
+
+* bumped AM version to 4.12.0-alpha.1 ([dec780b](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/dec780b861503889ab2b19a067b63e1758025eee))
+* Vertx 5 Upgrade ([3da31f6](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/3da31f6c6398ba71cb8e41c09f91b6b2a25072ca))
+
+
+### BREAKING CHANGES
+
+* Vertx5, JDK25
+
 ## [5.1.65](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.64...5.1.65) (2026-02-11)
 
 
