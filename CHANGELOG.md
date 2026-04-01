@@ -1,3 +1,10 @@
+# [6.0.0-alpha.2](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/6.0.0-alpha.1...6.0.0-alpha.2) (2026-04-01)
+
+
+### Features
+
+* remove SNAPSHOT versions ([c0e9759](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/c0e97599907e2cab92402ce4e766fb999a2743f7))
+
 # [6.0.0-alpha.1](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.65...6.0.0-alpha.1) (2026-03-31)
 
 
