@@ -25,11 +25,12 @@ https://oss.sonatype.org/content/repositories/snapshots
 
 ## Compatibility matrix
 
-| Connector version | APIM Version   | AM Version     |
-|-------------------|----------------|----------------|
-| 5.1.x             | 4.6.x to upper | N/A            |
-| 5.0.x             | 4.4.x to 4.5.x | 4.4.x to upper |
-| 4.0.x             | 4.2.x to 4.3.x | 4.2.x to 4.3.x |
+| Connector version | APIM Version    | AM Version     |
+|-------------------|-----------------|----------------|
+| 6.x               | 4.12.x to upper | N/A            |
+| 5.1.x             | 4.6.x to 4.11.x | N/A            |
+| 5.0.x             | 4.4.x to 4.5.x  | 4.4.x to upper |
+| 4.0.x             | 4.2.x to 4.3.x  | 4.2.x to 4.3.x |
 
 ## Building
 
@@ -58,4 +59,3 @@ or AM installation.
 | cockpit.connector.ws.ssl.truststore.type      | PKCS12  | The truststore type (PKCS12, PEM, JKS)                                         |
 | cockpit.connector.ws.ssl.truststore.path      |         | The path to the truststore used to trust the Cockpit server                    |
 | cockpit.connector.ws.ssl.truststore.password  |         | The password to used to access the truststore information                      |
-
