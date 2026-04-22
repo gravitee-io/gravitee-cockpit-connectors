@@ -1,3 +1,10 @@
+# [6.0.0-alpha.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/6.0.0-alpha.2...6.0.0-alpha.3) (2026-04-22)
+
+
+### Bug Fixes
+
+* **deps:** bump gravitee-exchange to 3.0.0-alpha.2 ([67c0e24](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/67c0e24e6c9f9a9d5da1c42e968afd962df64947))
+
 # [6.0.0-alpha.2](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/6.0.0-alpha.1...6.0.0-alpha.2) (2026-04-01)
 
 
