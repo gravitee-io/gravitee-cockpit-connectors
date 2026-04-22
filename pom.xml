@@ -44,7 +44,7 @@
         <gravitee-plugin.version>5.0.0-alpha.3</gravitee-plugin.version>
         <gravitee-alert-api.version>2.1.22</gravitee-alert-api.version>
         <gravitee-cockpit-api.version>4.0.0-alpha.1</gravitee-cockpit-api.version>
-        <gravitee-exchange.version>3.0.0-alpha.2</gravitee-exchange.version>
+        <gravitee-exchange.version>3.0.0-alpha.1</gravitee-exchange.version>
         <gravitee.archrules.skip>true</gravitee.archrules.skip>
 
         <jdk.version>17</jdk.version>
