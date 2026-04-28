@@ -1,3 +1,10 @@
+# [6.0.0-alpha.4](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/6.0.0-alpha.3...6.0.0-alpha.4) (2026-04-28)
+
+
+### Features
+
+* add gamma access points ([fa34360](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/fa34360bfd81f4df16661e17035010f1d1fe0099))
+
 # [6.0.0-alpha.3](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/6.0.0-alpha.2...6.0.0-alpha.3) (2026-04-22)
 
 
