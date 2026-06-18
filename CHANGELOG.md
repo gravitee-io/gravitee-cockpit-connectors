@@ -1,3 +1,22 @@
+# [6.0.0](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.68...6.0.0) (2026-06-18)
+
+
+### Bug Fixes
+
+* bump gravitee-parent ([8816f6a](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/8816f6a2d1303d5f361e88aba850d426a059c182))
+
+
+### Features
+
+* bump gravitee-exchange ([b3f6cb9](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/b3f6cb9c2a754e239aa22ca0fc71abd47ec98b1b))
+* bump gravitee-plugin ([9f8345e](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/9f8345ea1ab9e5154f55394cd29aedc3df131f5c))
+* Vertx 5 Upgrade ([d974bba](https://github.com/gravitee-io/gravitee-cockpit-connectors/commit/d974bba2e903e3a35ca3d23695ea782bd71314e6))
+
+
+### BREAKING CHANGES
+
+* Vertx5, JDK25
+
 ## [5.1.68](https://github.com/gravitee-io/gravitee-cockpit-connectors/compare/5.1.67...5.1.68) (2026-06-08)
 
 
