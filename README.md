@@ -25,11 +25,11 @@ https://oss.sonatype.org/content/repositories/snapshots
 
 ## Compatibility matrix
 
-| Connector version | APIM Version   | AM Version     |
-|-------------------|----------------|----------------|
-| 5.1.x             | 4.6.x to upper | N/A            |
-| 5.0.x             | 4.4.x to 4.5.x | 4.4.x to upper |
-| 4.0.x             | 4.2.x to 4.3.x | 4.2.x to 4.3.x |
+| Connector version | APIM Version   | AM Version     | Java version |
+|-------------------|----------------|----------------|--------------|
+| 5.1.x             | 4.6.x to upper | N/A            | 17           |
+| 5.0.x             | 4.4.x to 4.5.x | 4.4.x to upper | 17           |
+| 4.0.x             | 4.2.x to 4.3.x | 4.2.x to 4.3.x | 17           |
 
 ## Building
 
