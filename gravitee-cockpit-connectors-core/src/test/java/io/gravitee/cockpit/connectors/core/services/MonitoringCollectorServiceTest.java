@@ -142,14 +142,16 @@ class MonitoringCollectorServiceTest {
         final Monitoring nodeInfosMonitoring = new Monitoring();
         nodeInfosMonitoring.setPayload("nodeInfosPayload");
 
-        when(nodeMonitoringService.findByTypeAndTimeframe(eq(Monitoring.NODE_INFOS), anyLong(), anyLong()))
-            .thenReturn(Flowable.just(nodeInfosMonitoring));
+        when(nodeMonitoringService.findByTypeAndTimeframe(eq(Monitoring.NODE_INFOS), anyLong(), anyLong())).thenReturn(
+            Flowable.just(nodeInfosMonitoring)
+        );
 
         final Monitoring healthCheckMonitoring = new Monitoring();
         healthCheckMonitoring.setPayload("healthCheckPayload");
 
-        when(nodeMonitoringService.findByTypeAndTimeframe(eq(Monitoring.HEALTH_CHECK), anyLong(), anyLong()))
-            .thenReturn(Flowable.just(healthCheckMonitoring));
+        when(nodeMonitoringService.findByTypeAndTimeframe(eq(Monitoring.HEALTH_CHECK), anyLong(), anyLong())).thenReturn(
+            Flowable.just(healthCheckMonitoring)
+        );
 
         cut.collectAndSend();
 

@@ -119,8 +119,7 @@ public class MonitoringCollectorService {
     private NodeCommand convertToNodeCommand(Monitoring monitoring) throws JsonProcessingException {
         NodeInfos nodeInfos = objectMapper.readValue(monitoring.getPayload(), NodeInfos.class);
         return new NodeCommand(
-            NodeCommandPayload
-                .builder()
+            NodeCommandPayload.builder()
                 .nodeId(nodeInfos.getId())
                 .installationId(exchangeConnector.targetId())
                 .name(nodeInfos.getName())
@@ -128,7 +127,15 @@ public class MonitoringCollectorService {
                 .evaluatedAt(nodeInfos.getEvaluatedAt())
                 .status(NodeCommandPayload.Status.valueOf(nodeInfos.getStatus().name()))
                 .version(nodeInfos.getVersion())
-                .shardingTags(nodeInfos.getTags() == null ? List.of() : nodeInfos.getTags().stream().filter(tag -> !tag.isBlank()).toList())
+                .shardingTags(
+                    nodeInfos.getTags() == null
+                        ? List.of()
+                        : nodeInfos
+                            .getTags()
+                            .stream()
+                            .filter(tag -> !tag.isBlank())
+                            .toList()
+                )
                 .tenant(nodeInfos.getTenant())
                 .jdkVersion(nodeInfos.getJdkVersion())
                 .plugins(nodeInfos.getPluginInfos().stream().map(this::convertToNodePlugin).toList())
@@ -144,8 +151,7 @@ public class MonitoringCollectorService {
     private NodeHealthCheckCommand convertToHealthCheckCommand(Monitoring monitoring) throws JsonProcessingException {
         final HealthCheck healthCheck = objectMapper.readValue(monitoring.getPayload(), HealthCheck.class);
         return new NodeHealthCheckCommand(
-            NodeHealthCheckCommandPayload
-                .builder()
+            NodeHealthCheckCommandPayload.builder()
                 .nodeId(monitoring.getNodeId())
                 .installationId(exchangeConnector.targetId())
                 .evaluatedAt(healthCheck.getEvaluatedAt())
@@ -158,8 +164,7 @@ public class MonitoringCollectorService {
     private NodeHealthCheckCommandPayload.HealthCheckProbe convertToHealthCheckProbe(
         java.util.Map.Entry<String, io.gravitee.node.api.healthcheck.Result> e
     ) {
-        return NodeHealthCheckCommandPayload.HealthCheckProbe
-            .builder()
+        return NodeHealthCheckCommandPayload.HealthCheckProbe.builder()
             .key(e.getKey())
             .status(
                 e.getValue().isHealthy()

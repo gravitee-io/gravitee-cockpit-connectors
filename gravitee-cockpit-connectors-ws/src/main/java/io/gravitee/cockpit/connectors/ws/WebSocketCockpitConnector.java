@@ -92,22 +92,20 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
                 integrationConnectorCommandContext,
                 PROTOCOL_VERSION
             );
-            websocketExchangeConnector =
-                new WebSocketExchangeConnector(
-                    PROTOCOL_VERSION,
-                    connectorCommandHandlers,
-                    connectorCommandAdapters,
-                    connectorReplyAdapters,
-                    vertx,
-                    cockpitWebsocketConnectorClientFactory,
-                    cockpitExchangeSerDe
-                );
+            websocketExchangeConnector = new WebSocketExchangeConnector(
+                PROTOCOL_VERSION,
+                connectorCommandHandlers,
+                connectorCommandAdapters,
+                connectorReplyAdapters,
+                vertx,
+                cockpitWebsocketConnectorClientFactory,
+                cockpitExchangeSerDe
+            );
 
             exchangeConnectorManager
                 .register(websocketExchangeConnector)
                 .andThen(
-                    Completable
-                        .fromRunnable(() -> monitoringCollectorService.start(websocketExchangeConnector))
+                    Completable.fromRunnable(() -> monitoringCollectorService.start(websocketExchangeConnector))
                         .doOnError(throwable -> log.warn("Unable to start monitoring collector for cockpit connector"))
                         .onErrorComplete()
                 )
@@ -134,13 +132,11 @@ public class WebSocketCockpitConnector extends AbstractService<CockpitConnector>
 
     @Override
     public Single<Reply<?>> sendCommand(final Command<?> command) {
-        return Single
-            .fromCallable(() -> websocketExchangeConnector.isActive())
-            .flatMap(active ->
-                active
-                    ? websocketExchangeConnector.sendCommand(command)
-                    : Single.error(new IllegalStateException("CockpitConnector is not ready yet."))
-            );
+        return Single.fromCallable(() -> websocketExchangeConnector.isActive()).flatMap(active ->
+            active
+                ? websocketExchangeConnector.sendCommand(command)
+                : Single.error(new IllegalStateException("CockpitConnector is not ready yet."))
+        );
     }
 
     private class ContainerShutdownHook extends Thread {
